@@ -12,37 +12,33 @@ const razorpay = new Razorpay({
 
 export async function POST(req: NextRequest) {
   try {
-    const { uid } = requireAuth(); // user must be logged in
     await connectDB();
-
+    const { uid } = requireAuth();
     const body = await req.json();
     const { planId } = body;
 
     const plan = await Plan.findById(planId);
-    if (!plan || !plan.isActive) {
-      return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+    if (!plan) {
+      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
     }
 
-    // Create Razorpay Order
     const order = await razorpay.orders.create({
       amount: plan.priceInPaise,
       currency: "INR",
-      receipt: `rcpt_${uid}_${Date.now()}`,
-      notes: { userId: uid, planId: planId },
+      receipt: "rcpt_" + Date.now(), // ✅ FIXED
     });
 
-    // Save Payment entry
     await Payment.create({
       userId: uid,
-      planId: planId,
-      amountInPaise: plan.priceInPaise,
-      status: "created",
-      method: "online",
+      planId,
       razorpayOrderId: order.id,
+     amountInPaise: plan.priceInPaise, // ✅ fixed field name
+      status: "created",
     });
 
-    return NextResponse.json({ orderId: order.id, amount: plan.priceInPaise, currency: "INR" });
+    return NextResponse.json(order);
   } catch (err: any) {
+    console.error("Order API error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
