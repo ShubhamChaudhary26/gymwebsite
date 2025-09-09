@@ -1,30 +1,29 @@
 import Hero from "@/components/home/Hero";
-import Features from "@/components/home/Features";
 import Programs from "@/components/home/Programs";
-import Testimonials from "@/components/home/Testimonials";
-import Checkout from "@/components/Pricing/Payment";
+import Checkout from "@/Payment";
+import StatsSection from "@/components/home/stats";
+import FeaturesSection from "@/components/home/Features";
+import TestimonialsSection from "@/components/home/TestimonialsSection";
+import PricingSection from "@/components/Pricing/Price";
+import BlogSection from "@/components/Blog/BlogSection";
+import FAQSection from "@/components/faq/Faq";
+import ContactSection from "@/components/contact/contact";
 
 export default async function HomePage() {
-  const planId = "68bfb6d2024e3cc6dbfdce1b";
-
-  // backend se order create kar raha hai
-  const res = await fetch("http://localhost:3000/api/orders", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ planId }),
-    cache: "no-store", // force fresh request
-  });
-
-  const order = await res.json();
+ 
 
   return (
     <main>
       <Hero />
-      {/* ✅ orderId aur amount pass kar rahe ho */}
-      <Checkout orderId={order.id} amount={order.amount} />
-      <Features />
+      <StatsSection />
+      <FeaturesSection />
+     
       <Programs />
-      <Testimonials />
+      <TestimonialsSection />
+      <PricingSection/>
+      <BlogSection/>
+      <FAQSection/>
+      <ContactSection/>
     </main>
   );
 }

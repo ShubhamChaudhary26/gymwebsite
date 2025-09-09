@@ -1,8 +1,15 @@
 "use client";
 import { useState } from "react";
+import { User, Mail, Phone, Lock, UserPlus } from "lucide-react";
+import { Button } from "@mui/material";
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -28,7 +35,7 @@ export default function RegisterPage() {
         setError(data.error || "Registration failed");
       } else {
         alert("✅ Registration successful! Please login.");
-        window.location.href = "/login"; // redirect to login
+        window.location.href = "/login";
       }
     } catch (err: any) {
       setError(err.message);
@@ -38,60 +45,83 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
+      {/* Background Glow */}
+      <div className="absolute w-72 h-72 bg-primary/20 blur-3xl rounded-full -top-20 -left-20"></div>
+      <div className="absolute w-72 h-72 bg-primary/10 blur-3xl rounded-full bottom-0 right-0"></div>
+
       <form
         onSubmit={handleRegister}
-        className="bg-white p-6 rounded-2xl shadow-md w-96 space-y-4"
+        className="relative z-10 bg-white/10 backdrop-blur-lg border border-white/20 p-8 rounded-2xl shadow-xl w-96 space-y-6"
       >
-        <h2 className="text-2xl font-bold text-center">Register</h2>
+        <h2 className="text-3xl font-bold text-center text-white">Create Account</h2>
+        <p className="text-center text-white/60">Join us and start your journey</p>
 
-        {error && <p className="text-red-600">{error}</p>}
+        {error && <p className="text-red-400 text-sm">{error}</p>}
 
-        <input
-          type="text"
-          name="name"
-          placeholder="Full Name"
-          value={form.name}
-          onChange={handleChange}
-          className="w-full border px-3 py-2 rounded-lg"
-          required
-        />
+        {/* Name */}
+        <div className="relative">
+          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 w-5 h-5" />
+          <input
+            type="text"
+            name="name"
+            placeholder="Full Name"
+            value={form.name}
+            onChange={handleChange}
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/60 focus:ring-2 focus:ring-primary outline-none transition"
+            required
+          />
+        </div>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          className="w-full border px-3 py-2 rounded-lg"
-          required
-        />
+        {/* Email */}
+        <div className="relative">
+          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 w-5 h-5" />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/60 focus:ring-2 focus:ring-primary outline-none transition"
+            required
+          />
+        </div>
 
-        <input
-          type="text"
-          name="phone"
-          placeholder="Phone (optional)"
-          value={form.phone}
-          onChange={handleChange}
-          className="w-full border px-3 py-2 rounded-lg"
-        />
+        {/* Phone */}
+        <div className="relative">
+          <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 w-5 h-5" />
+          <input
+            type="text"
+            name="phone"
+            placeholder="Phone (optional)"
+            value={form.phone}
+            onChange={handleChange}
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/60 focus:ring-2 focus:ring-primary outline-none transition"
+          />
+        </div>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          className="w-full border px-3 py-2 rounded-lg"
-          required
-        />
+        {/* Password */}
+        <div className="relative">
+          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 w-5 h-5" />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/60 focus:ring-2 focus:ring-primary outline-none transition"
+            required
+          />
+        </div>
 
+        {/* Button */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+          className="w-full py-3 btn-hero font-semibold rounded-xl hover:scale-105  flex items-center justify-center gap-2"
         >
           {loading ? "Registering..." : "Register"}
+          {!loading && <UserPlus className="w-5 h-5" />}
         </button>
       </form>
     </div>

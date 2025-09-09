@@ -1,8 +1,9 @@
+import Trainers from '@/components/TrainersPage/Trainers'
 import React from 'react'
 
 const page = () => {
   return (
-    <div>page</div>
+    <div><Trainers /></div>
   )
 }
 
