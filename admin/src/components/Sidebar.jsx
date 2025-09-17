@@ -4,29 +4,29 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   LayoutDashboard,
-  Package,
-  Factory,
-  Leaf,
   FileText,
-  MessageSquare,
   Users,
   X,
   Settings,
   MailCheck,
   MessageSquareQuote,
+  Dumbbell, // ✅ new icon for trainers
+  Package,
+  CreditCard,
 } from "lucide-react";
 
+// Sidebar.js
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Users", href: "/users", icon: Users },
+  { name: "Subscriptions", href: "/subscriptions", icon: CreditCard },
+  { name: "Trainers", href: "/trainers", icon: Dumbbell },
   { name: "Products", href: "/products", icon: Package },
-  { name: "Plants", href: "/plants", icon: Factory },
-  { name: "Natures", href: "/natures", icon: Leaf },
   { name: "Blogs", href: "/blogs", icon: FileText },
-  { name: "Inquiries", href: "/inquiries", icon: MessageSquare },
-  { name: "Subscribe", href: "/subscribers", icon: MailCheck },
-  { name: "Quote", href: "/quotes", icon: MessageSquareQuote },
-  // { name: "Users", href: "/users", icon: Users },
+  { name: "Quotes", href: "/quotes", icon: MessageSquareQuote },
+  { name: "Subscribers", href: "/subscribers", icon: MailCheck },
 ];
+
 const Sidebar = ({ isOpen, isCollapsed, onClose, className }) => {
   return (
     <>

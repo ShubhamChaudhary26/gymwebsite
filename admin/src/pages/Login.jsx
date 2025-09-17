@@ -33,6 +33,7 @@ const Login = () => {
     });
   };
 
+  // Login.js handleSubmit mein add kar
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -47,6 +48,15 @@ const Login = () => {
     try {
       const result = await login(formData);
       if (result.success) {
+        // Check if user is admin
+        if (result.user?.role !== "admin") {
+          toast.error("Access denied. Admin credentials required.", {
+            id: loadingToast,
+          });
+          setError("Access denied. Admin credentials required.");
+          return;
+        }
+
         toast.success(`Welcome back, ${result.user?.name || "Admin"}!`, {
           id: loadingToast,
         });

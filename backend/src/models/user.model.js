@@ -40,13 +40,23 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is Required"],
       minlength: [6, "Password must be at least 6 characters"],
-      validate: {
-        validator: function (v) {
-          return /^[A-Za-z\d]{6,}$/.test(v);
-        },
-        message:
-          "Password must be at least 6 characters long and contain only letters or numbers.",
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+    currentSubscription: {
+      subscriptionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subscription",
       },
+      planId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Plan",
+      },
+      status: String,
+      expiryDate: Date,
     },
     isActive: {
       type: Boolean,

@@ -16,7 +16,6 @@ const Layout = () => {
       setSidebarCollapsed(!sidebarCollapsed);
     }
   };
-
   return (
     <div className="bg-background">
       {/* Mobile Sidebar Overlay */}

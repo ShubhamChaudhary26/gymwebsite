@@ -1,3 +1,4 @@
+// routes/quote.routes.js
 import express from "express";
 import {
   createQuote,
@@ -6,17 +7,17 @@ import {
   updateQuote,
   deleteQuote,
 } from "../controllers/quotes.controller.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { verifyAdminJWT } from "../middlewares/adminAuth.middleware.js";
 
 const router = express.Router();
 
 // Public routes
 router.get("/", getAllQuotes);
 router.get("/:id", getQuoteById);
+router.post("/create", createQuote); // Quote create public rakha hai
 
-// Private routes
-router.post("/create", createQuote);
-router.put("/:id", verifyJWT, updateQuote);
-router.delete("/:id", verifyJWT, deleteQuote);
+// Admin only routes
+router.put("/:id", verifyAdminJWT, updateQuote); // Admin reply kar sake
+router.delete("/:id", verifyAdminJWT, deleteQuote);
 
 export default router;

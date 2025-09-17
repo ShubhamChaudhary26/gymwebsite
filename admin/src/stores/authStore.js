@@ -10,7 +10,11 @@ const getCookie = (name) => {
   if (parts.length === 2) return parts.pop().split(";").shift();
   return null;
 };
-
+const checkAdminAuth = () => {
+  const adminToken = getCookie("adminAccessToken");
+  const adminRefreshToken = getCookie("adminRefreshToken");
+  return !!(adminToken && adminRefreshToken);
+};
 const useAuthStore = create((set, get) => ({
   user: null,
   isAuthenticated: false,
@@ -21,14 +25,16 @@ const useAuthStore = create((set, get) => ({
     try {
       const response = await apiService.login(credentials);
 
-      if (response.data?.user) {
+      // Check for admin key instead of user
+      if (response.data?.admin) {
+        // ✅ Change user to admin
         const user = {
-          id: response.data.user._id,
-          name: response.data.user.fullname,
-          email: response.data.user.email,
-          username: response.data.user.username,
-          avatar: response.data.user.avatar,
-          role: response.data.user.role || "user",
+          id: response.data.admin._id,
+          name: response.data.admin.fullname,
+          email: response.data.admin.email,
+          username: response.data.admin.username,
+          avatar: response.data.admin.avatar,
+          role: response.data.admin.role || "admin",
         };
 
         set({
@@ -42,20 +48,7 @@ const useAuthStore = create((set, get) => ({
       throw new Error("Login failed");
     } catch (error) {
       set({ isLoading: false });
-      let errorMessage = "Login failed";
-      if (error.message.includes("User does not exist")) {
-        errorMessage = "User not found. Please check your credentials.";
-      } else if (error.message.includes("Invalid user credentials")) {
-        errorMessage = "Invalid username or password.";
-      } else if (error.message.includes("Account is deactivated")) {
-        errorMessage =
-          "Your account has been deactivated. Please contact admin.";
-      } else if (error.message.includes("Too many requests")) {
-        errorMessage = "Too many login attempts. Please try again later.";
-      } else {
-        errorMessage = error.message;
-      }
-      return { success: false, error: errorMessage };
+      // ... rest of error handling
     }
   },
 
@@ -118,14 +111,14 @@ const useAuthStore = create((set, get) => ({
       const response = await apiService.getCurrentUser();
 
       if (response.success && response.data) {
-        const userData = response.data;
+        const userData = response.data.admin || response.data;
         const user = {
           id: userData._id,
           name: userData.fullname,
           email: userData.email,
           username: userData.username,
           avatar: userData.avatar,
-          role: userData.role || "user",
+          role: userData.role || "admin",
         };
 
         set({

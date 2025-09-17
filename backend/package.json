@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "setup-admin": "node scripts/setupFirstAdmin.js"
   },
   "author": "Flauraa",
   "license": "ISC",
@@ -26,7 +27,10 @@
     "mime": "^4.0.7",
     "mongoose": "^8.16.1",
     "multer": "^2.0.1",
+    "node-cron": "^4.2.1",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.5",
+    "razorpay": "^2.9.6",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

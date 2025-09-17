@@ -10,7 +10,7 @@ const supabase = createClient(
 
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || "files";
 const PUBLIC_BASE = (
-  process.env.PUBLIC_BASE_URL || "https://gajpatiindustries.com"
+  process.env.PUBLIC_BASE_URL || "http://localhost:3000"
 ).replace(/\/$/, "");
 
 // Build your-domain URL for a storage key

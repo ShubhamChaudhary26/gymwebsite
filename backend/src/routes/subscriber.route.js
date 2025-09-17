@@ -1,14 +1,19 @@
+// routes/subscriber.route.js
 import express from "express";
 import {
   getSubscribers,
-  createSubscriber, // Import the createSubscriber function
+  createSubscriber,
   deleteSubscriber,
 } from "../controllers/subscriber.controller.js";
+import { verifyAdminJWT } from "../middlewares/adminAuth.middleware.js";
 
 const router = express.Router();
 
-router.get("/subscribers", getSubscribers);
-router.post("/subscribers", createSubscriber); // Add POST route for subscribing
-router.delete("/subscribers/:id", deleteSubscriber);
+// Public route - Koi bhi subscribe kar sakta hai
+router.post("/subscribers", createSubscriber);
+
+// Admin only routes
+router.get("/subscribers", verifyAdminJWT, getSubscribers);
+router.delete("/subscribers/:id", verifyAdminJWT, deleteSubscriber);
 
 export default router;

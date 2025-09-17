@@ -55,6 +55,7 @@ const globalRateLimiter = rateLimit({
 
 // MIDDLEWARES
 app.use(compression());
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const allowedOrigins = [
@@ -83,8 +84,8 @@ app.use(
       ? {
           directives: {
             defaultSrc: ["'self'"],
-            imgSrc: ["'self'", "https://gajpatiindustries.com"],
-            connectSrc: ["'self'", "https://gajpatiindustries.com"],
+            imgSrc: ["'self'", "http://localhost:3000", "data:"],
+            connectSrc: ["'self'", "http://localhost:3000"],
           },
         }
       : {
@@ -97,7 +98,6 @@ app.use(
     crossOriginResourcePolicy: false,
   })
 );
-app.use(cookieParser());
 app.use(globalRateLimiter);
 
 // Routes Import
@@ -105,6 +105,15 @@ import userRouter from "./routes/user.routes.js";
 import blogRouter from "./routes/blog.routes.js";
 import subscriberRouter from "./routes/subscriber.route.js";
 import quotesRouter from "./routes/quote.routes.js";
+import trainerRouter from "./routes/trainer.routes.js";
+import productRouter from "./routes/product.routes.js";
+import adminSubscriptionRouter from "./routes/adminSubscription.routes.js";
+import paymentRouter from "./routes/payment.routes.js";
+import planRouter from "./routes/plan.routes.js";
+import { startCronJobs } from "./utils/cronJobs.js";
+// Add these imports
+import adminAuthRouter from "./routes/adminAuth.routes.js";
+import adminRouter from "./routes/admin.routes.js";
 // Apply routers
 app.get("/", async (req, res, next) => {
   res.json({ message: "Running" });
@@ -113,8 +122,16 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/blogs", blogRouter);
 app.use("/api/v1", subscriberRouter);
 app.use("/api/v1/quotes", quotesRouter);
+app.use("/api/v1/trainers", trainerRouter);
+app.use("/api/v1/products", productRouter);
+app.use("/api/v1/payments", paymentRouter);
+app.use("/api/v1/plans", planRouter);
+app.use("/api/v1/admin/auth", adminAuthRouter);
+app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/admin", adminSubscriptionRouter);
 app.use("/Uploads", uploadsRouter);
 
+startCronJobs();
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({

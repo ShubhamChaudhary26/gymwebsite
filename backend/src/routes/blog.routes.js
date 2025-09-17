@@ -7,7 +7,8 @@ import {
   updateBlog,
   deleteBlog,
 } from "../controllers/blog.controller.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+
+import { verifyAdminJWT } from "../middlewares/adminAuth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
@@ -20,16 +21,16 @@ router.get("/slug/:slug", getBlogBySlug);
 // Private routes
 router.post(
   "/create",
-  verifyJWT,
+  verifyAdminJWT,
   upload.fields([{ name: "image", maxCount: 1 }]),
   createBlog
 );
 router.put(
   "/:id",
-  verifyJWT,
+  verifyAdminJWT,
   upload.fields([{ name: "image", maxCount: 1 }]),
   updateBlog
 );
-router.delete("/:id", verifyJWT, deleteBlog);
+router.delete("/:id", verifyAdminJWT, deleteBlog);
 
 export default router;

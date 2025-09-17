@@ -1,4 +1,4 @@
-// const API_BASE_URL = "http://localhost:3000/api/v1";
+// api.js (Fixed Version with Correct Endpoints)
 class ApiService {
   constructor() {
     this.baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -111,8 +111,8 @@ class ApiService {
 
   // Auth endpoints
   async login(credentials) {
-    console.log("🔐 Attempting login...");
-    return this.request("/users/login", {
+    console.log("🔐 Attempting admin login...");
+    return this.request("/admin/auth/login", {
       method: "POST",
       body: JSON.stringify(credentials),
     });
@@ -126,15 +126,15 @@ class ApiService {
   }
 
   async logout() {
-    console.log("🚪 Logging out...");
-    return this.request("/users/logout", {
+    console.log("🚪 Logging out admin...");
+    return this.request("/admin/auth/logout", {
       method: "POST",
     });
   }
   async refreshToken() {
-    console.log("🔄 Refreshing token...");
+    console.log("🔄 Refreshing admin token...");
     try {
-      const response = await this.request("/users/refresh-token", {
+      const response = await this.request("/admin/auth/refresh-token", {
         method: "POST",
       });
       return response;
@@ -146,12 +146,12 @@ class ApiService {
 
   async getCurrentUser() {
     try {
-      const response = await this.request("/users/me", {
+      const response = await this.request("/admin/auth/me", {
         method: "GET",
       });
       return {
         success: true,
-        data: response.data, // Ensure the backend returns { data: user }
+        data: response.data,
       };
     } catch (error) {
       return {
@@ -161,134 +161,58 @@ class ApiService {
     }
   }
 
-  // Products endpoints (with FormData for file upload)
-  async getProducts(params = {}) {
+  // User Management endpoints
+  async getUsers(params = {}) {
     const queryString = new URLSearchParams(params).toString();
-    return this.request(`/products/allProducts?${queryString}`);
+    return this.request(`/admin/users?${queryString}`);
   }
 
-  async getProduct(id) {
-    return this.request(`/products/${id}`);
+  async getAllAdmins() {
+    return this.request("/admin/admins");
   }
 
-  async createProduct(productData) {
-    return this.request("/products/create", {
+  async createAdmin(adminData) {
+    return this.request("/admin/admins/create", {
       method: "POST",
-      body: productData,
-      headers: {}, // Remove Content-Type for FormData
+      body: JSON.stringify(adminData),
     });
   }
 
-  async updateProduct(id, productData) {
-    return this.request(`/products/${id}`, {
+  async promoteToAdmin(userId) {
+    return this.request(`/admin/users/${userId}/promote`, {
       method: "PUT",
-      body: productData,
-      headers: {}, // Remove Content-Type for FormData
     });
   }
 
-  async deleteProduct(id) {
-    return this.request(`/products/${id}`, {
-      method: "DELETE",
+  async demoteFromAdmin(userId) {
+    return this.request(`/admin/users/${userId}/demote`, {
+      method: "PUT",
     });
   }
 
-  async permanentDeleteProduct(id) {
-    return this.request(`/products/permanent/${id}`, {
-      method: "DELETE",
-    });
-  }
-
-  async toggleProductStatus(id) {
-    return this.request(`/products/${id}/toggle-status`, {
-      method: "PATCH",
-    });
-  }
-
-  // Plants endpoints
-  async getPlants(params = {}) {
-    const queryString = new URLSearchParams(params).toString();
-    return this.request(`/plants/allPlants?${queryString}`);
-  }
-
-  async getPlant(id) {
-    return this.request(`/plants/${id}`);
-  }
-
-  async createPlant(plantData) {
-    return this.request("/plants/create", {
+  async createUser(userData) {
+    return this.request("/admin/users/create", {
       method: "POST",
-      body: JSON.stringify(plantData),
+      body: JSON.stringify(userData),
     });
   }
 
-  async updatePlant(id, plantData) {
-    return this.request(`/plants/${id}`, {
+  async updateUser(userId, userData) {
+    return this.request(`/admin/users/${userId}`, {
       method: "PUT",
-      body: JSON.stringify(plantData),
+      body: JSON.stringify(userData),
     });
   }
 
-  async deletePlant(id) {
-    return this.request(`/plants/${id}`, {
+  async deleteUser(id) {
+    return this.request(`/admin/users/${id}`, {
       method: "DELETE",
     });
   }
 
-  async permanentDeletePlant(id) {
-    return this.request(`/plants/permanent/${id}`, {
-      method: "DELETE",
-    });
-  }
-
-  async togglePlantStatus(id) {
-    return this.request(`/plants/${id}/toggle-status`, {
-      method: "PATCH",
-    });
-  }
-
-  // Natures endpoints (with FormData for image upload)
-  async getNatures(params = {}) {
-    const queryString = new URLSearchParams(params).toString();
-    return this.request(`/natures/allNatures?${queryString}`);
-  }
-
-  async getNature(id) {
-    return this.request(`/natures/${id}`);
-  }
-
-  async createNature(natureData) {
-    return this.request("/natures/create", {
-      method: "POST",
-      body: natureData,
-      headers: {}, // Remove Content-Type for FormData
-    });
-  }
-
-  async updateNature(id, natureData) {
-    return this.request(`/natures/${id}`, {
-      method: "PUT",
-      body: natureData,
-      headers: {}, // Remove Content-Type for FormData
-    });
-  }
-
-  async deleteNature(id) {
-    return this.request(`/natures/${id}`, {
-      method: "DELETE",
-    });
-  }
-
-  async permanentDeleteNature(id) {
-    return this.request(`/natures/permanent/${id}`, {
-      method: "DELETE",
-    });
-  }
-
-  async toggleNatureStatus(id) {
-    return this.request(`/natures/${id}/toggle-status`, {
-      method: "PATCH",
-    });
+  // Dashboard Stats
+  async getDashboardStats() {
+    return this.request("/admin/dashboard/stats");
   }
 
   // Blogs endpoints (with FormData for image upload)
@@ -394,41 +318,102 @@ class ApiService {
       method: "DELETE",
     });
   }
+  // api.js
 
-  // Users endpoints
-  async getUsers(params = {}) {
-    const queryString = new URLSearchParams(params).toString();
-    return this.request(`/users?${queryString}`);
+  // 🆕 Trainer endpoints
+  async getTrainers() {
+    return this.request("/trainers", { method: "GET" });
   }
 
-  async getUser(id) {
-    return this.request(`/users/${id}`);
-  }
-
-  async createUser(userData) {
-    return this.request("/users", {
+  async createTrainer(formData) {
+    return this.request("/trainers/create", {
       method: "POST",
-      body: JSON.stringify(userData),
+      body: formData,
+      headers: {}, // ❌ content-type auto handle by browser
     });
   }
 
-  async updateUser(id, userData) {
-    return this.request(`/users/${id}`, {
+  async updateTrainer(id, formData) {
+    return this.request(`/trainers/${id}`, {
       method: "PUT",
-      body: JSON.stringify(userData),
+      body: formData,
+      headers: {},
     });
   }
 
-  async deleteUser(id) {
-    return this.request(`/users/${id}`, {
+  async deleteTrainer(id) {
+    return this.request(`/trainers/${id}`, { method: "DELETE" });
+  }
+  // api.js Product endpoints (already got most of them probably)
+  async getProducts() {
+    return this.request("/products", { method: "GET" });
+  }
+
+  async createProduct(formData) {
+    return this.request("/products/create", {
+      method: "POST",
+      body: formData,
+      headers: {}, // don't set content-type for FormData
+    });
+  }
+
+  async updateProduct(id, formData) {
+    return this.request(`/products/${id}`, {
+      method: "PUT",
+      body: formData,
+      headers: {},
+    });
+  }
+
+  async deleteProduct(id) {
+    return this.request(`/products/${id}`, { method: "DELETE" });
+  }
+  async getSubscriptions(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/subscriptions?${queryString}`);
+  }
+
+  async getSubscriptionStats() {
+    return this.request("/admin/subscriptions/stats");
+  }
+
+  async cancelSubscription(subscriptionId) {
+    return this.request(`/admin/subscriptions/${subscriptionId}/cancel`, {
+      method: "PUT",
+    });
+  }
+
+  // Plan endpoints
+  async getPlans() {
+    return this.request("/plans");
+  }
+
+  async createPlan(planData) {
+    return this.request("/plans/create", {
+      method: "POST",
+      body: JSON.stringify(planData),
+    });
+  }
+
+  async updatePlan(planId, planData) {
+    return this.request(`/plans/${planId}`, {
+      method: "PUT",
+      body: JSON.stringify(planData),
+    });
+  }
+
+  async deletePlan(planId) {
+    return this.request(`/plans/${planId}`, {
       method: "DELETE",
     });
   }
 
-  // Search products with filters (search, isActive, etc.)
-  async searchProducts(params = {}) {
-    const queryString = new URLSearchParams(params).toString();
-    return this.request(`/products/search?${queryString}`);
+  // Payment endpoints (for testing)
+  async createTestPayment(userId, planId) {
+    return this.request("/admin/payments/test", {
+      method: "POST",
+      body: JSON.stringify({ userId, planId }),
+    });
   }
 }
 

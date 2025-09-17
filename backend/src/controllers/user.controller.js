@@ -2,7 +2,6 @@ import { User } from "../models/user.model.js";
 import { throwApiError } from "../utils/apiError.js";
 import { sendResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import {
   accessTokenCookieOptions,
   cookieOptions,

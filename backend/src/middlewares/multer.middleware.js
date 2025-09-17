@@ -6,7 +6,11 @@ const customFileFilter = (req, file, cb) => {
     return cb(new Error("File name is missing"), false);
   }
   // images field: only allow images
-  if (file.fieldname === "image" || file.fieldname === "images") {
+  if (
+    file.fieldname === "image" ||
+    file.fieldname === "images" ||
+    file.fieldname === "photo"
+  ) {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const extname = allowedTypes.test(
       path.extname(file.originalname).toLowerCase()
