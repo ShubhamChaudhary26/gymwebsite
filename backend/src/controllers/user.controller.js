@@ -130,7 +130,11 @@ export const loginUser = asyncHandler(async (req, res) => {
         .cookie("accessToken", accessToken, cookieOptions)
         .cookie("refreshToken", refreshToken, cookieOptions),
       200,
-      { user: loginUser },
+      {
+        user: loginUser,
+        accessToken, // ✅ INSIDE DATA OBJECT
+        refreshToken, // ✅ INSIDE DATA OBJECT
+      },
       "Login successful"
     );
   } catch (error) {

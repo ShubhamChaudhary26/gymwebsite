@@ -19,30 +19,36 @@ const validate = (values, isEdit) => {
 };
 
 const TrainerForm = ({
-  initialValues = {},
+  initialData = {}, // ✅ Prop ka naam initialData rakhte hai for consistency
   onSubmit,
   onCancel,
   loading = false,
   isEdit = false,
 }) => {
-  const [values, setValues] = useState({
-    ...initialFormState,
-    ...initialValues,
-    image: null,
-  });
+  // ✅ Initial state ko simple rakho
+  const [values, setValues] = useState(initialFormState);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
-  const [imagePreview, setImagePreview] = useState(initialValues.image || null);
+  const [imagePreview, setImagePreview] = useState(null);
 
-  // reset form on edit mode change
+  // ✅ ProductForm jaisa useEffect
   useEffect(() => {
-    setValues({
-      ...initialFormState,
-      ...initialValues,
-      image: null,
-    });
-    setImagePreview(initialValues.image || null);
-  }, [initialValues?._id, isEdit]);
+    if (isEdit && initialData?._id) {
+      setValues({
+        name: initialData.name || "",
+        post: initialData.post || "",
+        instagramId: initialData.instagramId || "",
+        image: null, // Image file reset kar dete hai
+      });
+      setImagePreview(initialData.image || null);
+      setErrors({});
+      setTouched({});
+    } else {
+      // Reset for create form
+      setValues(initialFormState);
+      setImagePreview(null);
+    }
+  }, [isEdit, initialData]);
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;

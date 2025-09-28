@@ -1,9 +1,15 @@
 // pages/Dashboard.jsx
 import { useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import apiService from "@/services/api";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -15,280 +21,199 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-
 import {
   Users,
   MessageSquareQuote,
-  ArrowUpRight,
-  ArrowDownRight,
   RefreshCw,
+  CreditCard,
+  DollarSign,
+  AlertCircle,
+  TrendingUp,
+  BarChart2,
+  Dumbbell,
 } from "lucide-react";
-
 import {
   ResponsiveContainer,
   BarChart,
   Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   PieChart,
   Pie,
   Cell,
+  LineChart,
+  Line,
+  CartesianGrid,
 } from "recharts";
 
 const COLORS = {
   primary: "hsl(var(--primary))",
+  green: "#34d399",
+  orange: "#fbbf24",
+  red: "#f87171",
   blue: "#60a5fa",
   purple: "#a78bfa",
-  green: "#34d399",
-  yellow: "#fbbf24",
-  red: "#f87171",
-  slate: "#94a3b8",
 };
 
 // Helpers
 const formatDate = (d) =>
   new Date(d).toLocaleDateString("en-US", {
-    year: "numeric",
     month: "short",
     day: "numeric",
   });
 
-const startOfDay = (d) => {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  return x;
-};
-const isSameDay = (a, b) => startOfDay(a).getTime() === startOfDay(b).getTime();
-
-const getLastNDays = (n) => {
-  const days = [];
-  const today = startOfDay(new Date());
-  for (let i = n - 1; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    days.push(d);
-  }
-  return days;
-};
-
-const countByDay = (items, field, days) =>
-  days.map((d) => ({
-    label: d.toLocaleDateString("en-US", { weekday: "short" }),
-    date: d,
-    count: items.filter((it) => isSameDay(new Date(it[field]), d)).length,
-  }));
-
-const weekSplit = (items, field) => {
-  const today = startOfDay(new Date());
-  const startThisWeek = new Date(today);
-  startThisWeek.setDate(today.getDate() - 6);
-  const startLastWeek = new Date(startThisWeek);
-  startLastWeek.setDate(startLastWeek.getDate() - 7);
-  const endLastWeek = new Date(startThisWeek);
-  endLastWeek.setDate(endLastWeek.getDate() - 1);
-
-  const inRange = (d, a, b) => {
-    const x = startOfDay(new Date(d));
-    return x >= startOfDay(a) && x <= startOfDay(b);
-  };
-
-  const thisWeek = items.filter((i) =>
-    inRange(i[field], startThisWeek, today)
-  ).length;
-  const lastWeek = items.filter((i) =>
-    inRange(i[field], startLastWeek, endLastWeek)
-  ).length;
-
-  const change =
-    lastWeek === 0
-      ? thisWeek > 0
-        ? 100
-        : 0
-      : Math.round(((thisWeek - lastWeek) / lastWeek) * 100);
-
-  return { thisWeek, lastWeek, change };
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+  }).format(amount);
 };
 
 const Dashboard = () => {
   const queryClient = useQueryClient();
-  const { data: subscriptionStats } = useQuery({
+
+  // Fetch all data
+  const { data: dashboardData, isLoading: statsLoading } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: () => apiService.getDashboardStats(),
+  });
+
+  const { data: subscriptionStats, isLoading: subStatsLoading } = useQuery({
     queryKey: ["subscription-stats"],
     queryFn: () => apiService.getSubscriptionStats(),
   });
 
-  // Fetch live data (admin endpoints for users, public for quotes)
-  const {
-    data: usersRes,
-    isLoading: usersLoading,
-    error: usersError,
-  } = useQuery({
-    queryKey: ["dashboard-users"],
-    queryFn: () => apiService.getUsers({ role: "all", status: "all" }),
+  const { data: recentSubscriptions, isLoading: subsLoading } = useQuery({
+    queryKey: ["recent-subscriptions"],
+    queryFn: () => apiService.getSubscriptions({ limit: 5 }),
   });
 
-  const {
-    data: quotesRes,
-    isLoading: quotesLoading,
-    error: quotesError,
-  } = useQuery({
-    queryKey: ["dashboard-quotes"],
-    queryFn: () => apiService.getQuotes(),
-  });
+  const isLoading = statsLoading || subStatsLoading || subsLoading;
 
-  const users = usersRes?.data || [];
-  const quotes = quotesRes?.data || [];
-
-  // Derived stats (no static)
-  const totalUsers = users.length;
-  const totalAdmins = users.filter((u) => u.role === "admin").length;
-  const activeUsers = users.filter((u) => u.isActive).length;
-
-  const totalQuotes = quotes.length;
-  const quotesByStatus = quotes.reduce(
-    (acc, q) => {
-      acc[q.status] = (acc[q.status] || 0) + 1;
-      return acc;
-    },
-    { New: 0, "In Progress": 0, Resolved: 0, Closed: 0 }
-  );
-
-  // Chart: Users signups in last 7 days
-  const days = getLastNDays(7);
-  const signupsChart = countByDay(users, "createdAt", days);
-
-  // Trends week-over-week
-  const usersTrend = weekSplit(users, "createdAt");
-  const quotesTrend = weekSplit(quotes, "createdAt");
-
-  const isLoading = usersLoading || quotesLoading;
-  const hasError = usersError || quotesError;
+  const stats = dashboardData?.data || {};
+  const subStats = subscriptionStats?.data || {};
+  const recentSubs = recentSubscriptions?.data || [];
 
   const refetchAll = () => {
-    queryClient.invalidateQueries({ queryKey: ["dashboard-users"] });
-    queryClient.invalidateQueries({ queryKey: ["dashboard-quotes"] });
+    queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+    queryClient.invalidateQueries({ queryKey: ["subscription-stats"] });
+    queryClient.invalidateQueries({ queryKey: ["recent-subscriptions"] });
   };
+
+  // Prepare chart data
+  const revenueData = useMemo(() => {
+    // Replace with real data when API is ready
+    return [
+      { name: "Jan", revenue: 4000 },
+      { name: "Feb", revenue: 3000 },
+      { name: "Mar", revenue: 5000 },
+      { name: "Apr", revenue: 4500 },
+      { name: "May", revenue: 6000 },
+      { name: "Jun", revenue: 5500 },
+    ];
+  }, []);
+
+  const planDistribution = useMemo(() => {
+    if (!recentSubs || recentSubs.length === 0) return [];
+
+    const counts = recentSubs.reduce((acc, sub) => {
+      const planName = sub.planId?.name || "Unknown";
+      acc[planName] = (acc[planName] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  }, [recentSubs]);
 
   return (
     <div className="space-y-6">
-      {/* Top */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Gym Dashboard</h1>
           <p className="text-muted-foreground">
-            Live overview of users and quotes
+            Welcome back, Admin! Here's your gym's performance snapshot.
           </p>
         </div>
-        <Button variant="outline" onClick={refetchAll}>
-          <RefreshCw className="h-4 w-4 mr-2" />
+        <Button variant="outline" onClick={refetchAll} disabled={isLoading}>
+          <RefreshCw
+            className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+          />
           Refresh
         </Button>
       </div>
 
-      {/* Stat Cards */}
+      {/* Main Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Users"
-          value={totalUsers}
-          sub={`${activeUsers} active • ${totalAdmins} admins`}
-          icon={<Users className="h-5 w-5 text-muted-foreground" />}
-          trend={usersTrend.change}
+          title="Total Revenue"
+          value={formatCurrency(subStats.totalRevenue || 0)}
+          sub={`Avg. value: ${formatCurrency(subStats.avgValue || 0)}`}
+          icon={<DollarSign className="h-5 w-5 text-green-600" />}
           loading={isLoading}
         />
         <StatCard
-          title="New Users (7d)"
-          value={usersTrend.thisWeek}
-          sub={`Last week: ${usersTrend.lastWeek}`}
-          icon={<ArrowUpRight className="h-5 w-5 text-green-600" />}
-          trend={usersTrend.change}
+          title="Active Members"
+          value={subStats.activeSubscriptions || 0}
+          sub={`${subStats.newThisMonth || 0} new this month`}
+          icon={<Users className="h-5 w-5 text-blue-600" />}
           loading={isLoading}
         />
         <StatCard
-          title="Total Quotes"
-          value={totalQuotes}
-          sub={`New: ${quotesByStatus["New"] ?? 0} • In Progress: ${
-            quotesByStatus["In Progress"] ?? 0
-          }`}
-          icon={
-            <MessageSquareQuote className="h-5 w-5 text-muted-foreground" />
-          }
-          trend={quotesTrend.change}
+          title="Memberships Expiring"
+          value={subStats.expiringSoon || 0}
+          sub="In next 7 days"
+          icon={<AlertCircle className="h-5 w-5 text-orange-600" />}
           loading={isLoading}
         />
         <StatCard
-          title="Resolved (7d)"
-          value={
-            quotes.filter((q) =>
-              isSameDay(new Date(q.updatedAt || q.createdAt), new Date())
-            ).length
-          }
-          sub={`Resolved total: ${quotesByStatus["Resolved"] ?? 0}`}
-          icon={<ArrowDownRight className="h-5 w-5 text-purple-600" />}
-          trend={quotesTrend.change}
+          title="Total Trainers"
+          value={stats.totalTrainers || 0}
+          sub="Ready to assist"
+          icon={<Dumbbell className="h-5 w-5 text-purple-600" />}
           loading={isLoading}
         />
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Active Subscriptions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {subscriptionStats?.activeSubscriptions || 0}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Monthly Revenue
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ₹{subscriptionStats?.totalRevenue || 0}
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
-      {/* Charts + Status donut */}
+      {/* Revenue Chart & Plan Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Weekly User Signups</CardTitle>
+            <CardTitle>Monthly Revenue Trend</CardTitle>
+            <CardDescription>
+              Revenue generated from subscriptions over the last 6 months.
+            </CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             {isLoading ? (
               <SkeletonChart />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={signupsChart}>
+                <LineChart data={revenueData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="label" tickLine={false} axisLine={false} />
+                  <XAxis dataKey="name" tickLine={false} axisLine={false} />
                   <YAxis
                     tickLine={false}
                     axisLine={false}
-                    allowDecimals={false}
+                    tickFormatter={(val) => `₹${val / 1000}k`}
                   />
                   <Tooltip
-                    cursor={{ fill: "hsl(var(--muted))" }}
                     contentStyle={{
                       background: "hsl(var(--background))",
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "var(--radius)",
                     }}
-                    formatter={(val) => [`${val}`, "Signups"]}
+                    formatter={(val) => [formatCurrency(val), "Revenue"]}
                   />
-                  <Bar
-                    dataKey="count"
-                    fill={COLORS.primary}
-                    radius={[6, 6, 0, 0]}
+                  <Line
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke={COLORS.primary}
+                    strokeWidth={2}
+                    dot={{ r: 4 }}
                   />
-                </BarChart>
+                </LineChart>
               </ResponsiveContainer>
             )}
           </CardContent>
@@ -296,7 +221,10 @@ const Dashboard = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Quotes by Status</CardTitle>
+            <CardTitle>Plan Distribution</CardTitle>
+            <CardDescription>
+              Popularity of plans among recent subscriptions.
+            </CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             {isLoading ? (
@@ -305,51 +233,25 @@ const Dashboard = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={[
-                      {
-                        name: "New",
-                        value: quotesByStatus["New"] ?? 0,
-                        color: COLORS.blue,
-                      },
-                      {
-                        name: "In Progress",
-                        value: quotesByStatus["In Progress"] ?? 0,
-                        color: COLORS.yellow,
-                      },
-                      {
-                        name: "Resolved",
-                        value: quotesByStatus["Resolved"] ?? 0,
-                        color: COLORS.green,
-                      },
-                      {
-                        name: "Closed",
-                        value: quotesByStatus["Closed"] ?? 0,
-                        color: COLORS.red,
-                      },
-                    ]}
+                    data={planDistribution}
                     dataKey="value"
+                    nameKey="name"
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
                     outerRadius={90}
                     paddingAngle={2}
-                    stroke="transparent"
+                    labelLine={false}
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
                   >
-                    {["New", "In Progress", "Resolved", "Closed"].map(
-                      (s, i) => (
-                        <Cell
-                          key={s}
-                          fill={
-                            [
-                              COLORS.blue,
-                              COLORS.yellow,
-                              COLORS.green,
-                              COLORS.red,
-                            ][i]
-                          }
-                        />
-                      )
-                    )}
+                    {planDistribution.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[["green", "blue", "orange"][index % 3]]}
+                      />
+                    ))}
                   </Pie>
                   <Tooltip
                     contentStyle={{
@@ -361,84 +263,74 @@ const Dashboard = () => {
                 </PieChart>
               </ResponsiveContainer>
             )}
-            {!isLoading && (
-              <div className="mt-4 flex flex-wrap gap-2">
-                <LegendDot
-                  color={COLORS.blue}
-                  label={`New (${quotesByStatus["New"] ?? 0})`}
-                />
-                <LegendDot
-                  color={COLORS.yellow}
-                  label={`In Progress (${quotesByStatus["In Progress"] ?? 0})`}
-                />
-                <LegendDot
-                  color={COLORS.green}
-                  label={`Resolved (${quotesByStatus["Resolved"] ?? 0})`}
-                />
-                <LegendDot
-                  color={COLORS.red}
-                  label={`Closed (${quotesByStatus["Closed"] ?? 0})`}
-                />
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Activity */}
+      {/* Recent Activity Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Recent Users</CardTitle>
+            <CardTitle>Newest Members</CardTitle>
+            <CardDescription>Recently joined members.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Joined</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(users || [])
-                  .slice()
-                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                  .slice(0, 5)
-                  .map((u) => (
-                    <TableRow key={u._id}>
+            {isLoading ? (
+              <SkeletonTable />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Member</TableHead>
+                    <TableHead>Plan</TableHead>
+                    <TableHead>Start Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentSubs.map((sub) => (
+                    <TableRow key={sub._id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={u.avatar} />
+                            <AvatarImage src={sub.userId?.avatar} />
                             <AvatarFallback>
-                              {u.fullname?.[0]?.toUpperCase()}
+                              {sub.userId?.fullname?.[0]?.toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="font-medium">{u.fullname}</span>
+                          <span className="font-medium">
+                            {sub.userId?.fullname}
+                          </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {u.email}
+                      <TableCell>
+                        <Badge variant="outline">{sub.planId?.name}</Badge>
                       </TableCell>
-                      <TableCell>{formatDate(u.createdAt)}</TableCell>
+                      <TableCell>{formatDate(sub.startDate)}</TableCell>
                     </TableRow>
                   ))}
-              </TableBody>
-            </Table>
+                </TableBody>
+              </Table>
+            )}
+            <div className="text-right mt-4">
+              <Button asChild variant="link">
+                <Link to="/subscriptions">View All Subscriptions</Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle>Recent Quotes</CardTitle>
+            <CardDescription>
+              New inquiries from potential members.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {(quotes || [])
-              .slice()
-              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-              .slice(0, 6)
-              .map((q) => (
+            {isLoading ? (
+              <SkeletonList />
+            ) : (
+              stats.recentActivity?.quotes?.slice(0, 5).map((q) => (
                 <div key={q._id} className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">{q.customerName}</p>
@@ -446,25 +338,27 @@ const Dashboard = () => {
                       {formatDate(q.createdAt)}
                     </p>
                   </div>
-                  <Badge variant="outline">{q.status}</Badge>
+                  <Badge variant={q.status === "New" ? "default" : "outline"}>
+                    {q.status}
+                  </Badge>
                 </div>
-              ))}
+              ))
+            )}
+            <div className="text-right mt-4">
+              <Button asChild variant="link">
+                <Link to="/quotes">View All Quotes</Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
-
-      {hasError && (
-        <div className="text-red-500 text-sm">
-          Some sections failed to load. Try refreshing.
-        </div>
-      )}
     </div>
   );
 };
 
-// Small components
-const StatCard = ({ title, value, sub, icon, trend, loading }) => (
-  <Card className="overflow-hidden">
+// Small helper components
+const StatCard = ({ title, value, sub, icon, loading }) => (
+  <Card>
     <CardHeader className="flex flex-row items-center justify-between pb-2">
       <CardTitle className="text-sm font-medium">{title}</CardTitle>
       {icon}
@@ -478,56 +372,36 @@ const StatCard = ({ title, value, sub, icon, trend, loading }) => (
       ) : (
         <>
           <div className="text-2xl font-bold">{value}</div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-            {typeof trend === "number" && (
-              <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${
-                  trend >= 0
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-red-100 text-red-700"
-                }`}
-              >
-                {trend >= 0 ? (
-                  <ArrowUpRight className="h-3 w-3" />
-                ) : (
-                  <ArrowDownRight className="h-3 w-3" />
-                )}
-                {Math.abs(trend)}%
-              </span>
-            )}
-            <span>{sub}</span>
-          </div>
+          <p className="text-xs text-muted-foreground mt-1">{sub}</p>
         </>
       )}
     </CardContent>
   </Card>
 );
 
-const SkeletonChart = () => (
-  <div className="h-full w-full flex items-end gap-3 px-4">
-    {[...Array(7)].map((_, i) => (
-      <div
-        key={i}
-        className="flex-1 bg-muted animate-pulse rounded-t"
-        style={{ height: `${30 + i * 8}px` }}
-      />
+const SkeletonTable = () => (
+  <div className="space-y-2">
+    {[...Array(5)].map((_, i) => (
+      <div key={i} className="h-10 w-full bg-muted animate-pulse rounded" />
     ))}
   </div>
+);
+
+const SkeletonList = () => (
+  <div className="space-y-3">
+    {[...Array(5)].map((_, i) => (
+      <div key={i} className="h-8 w-full bg-muted animate-pulse rounded" />
+    ))}
+  </div>
+);
+
+const SkeletonChart = () => (
+  <div className="h-full w-full bg-muted animate-pulse rounded-lg" />
 );
 
 const SkeletonDonut = () => (
   <div className="h-full w-full flex items-center justify-center">
     <div className="h-40 w-40 rounded-full bg-muted animate-pulse" />
-  </div>
-);
-
-const LegendDot = ({ color, label }) => (
-  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-    <span
-      className="inline-block h-3 w-3 rounded-full"
-      style={{ backgroundColor: color }}
-    />
-    {label}
   </div>
 );
 

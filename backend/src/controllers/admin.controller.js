@@ -6,7 +6,8 @@ import { sendEmail } from "../utils/sendEmail.js";
 import Blog from "../models/blog.model.js";
 import { Quote } from "../models/quote.model.js";
 import { Subscriber } from "../models/subscriber.model.js";
-
+import { Subscription } from "../models/subscription.model.js";
+import { Plan } from "../models/plan.model.js";
 // Get all admins
 export const getAllAdmins = asyncHandler(async (req, res) => {
   const admins = await User.find({ role: "admin" })
@@ -265,4 +266,92 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
   };
 
   return sendResponse(res, 200, stats, "Dashboard stats fetched successfully");
+});
+
+// Offline subscription create karne ke liye
+export const createOfflineSubscription = asyncHandler(async (req, res) => {
+  const {
+    userId,
+    planId,
+    paymentMethod, // cash/upi/cheque
+    transactionId, // optional - UPI/Cheque number
+    notes,
+  } = req.body;
+
+  // Validations
+  if (!userId || !planId || !paymentMethod) {
+    throw throwApiError(400, "User, Plan and Payment method are required");
+  }
+
+  // Check if user already has active subscription
+  const existingSubscription = await Subscription.findOne({
+    userId,
+    status: "active",
+  });
+
+  if (existingSubscription) {
+    throw throwApiError(400, "User already has an active subscription");
+  }
+
+  // Get plan details
+  const plan = await Plan.findById(planId);
+  if (!plan) throw throwApiError(404, "Plan not found");
+
+  const user = await User.findById(userId);
+  if (!user) throw throwApiError(404, "User not found");
+
+  // Create subscription
+  const startDate = new Date();
+  const endDate = new Date();
+  endDate.setDate(endDate.getDate() + plan.duration);
+
+  const subscription = await Subscription.create({
+    userId,
+    planId,
+    amount: plan.price,
+    status: "active",
+    startDate,
+    endDate,
+    paymentDetails: {
+      method: paymentMethod,
+      transactionId: transactionId || `OFFLINE_${Date.now()}`,
+      notes: notes || "Offline payment",
+      isOffline: true,
+      collectedBy: req.admin.fullname,
+      paidAt: new Date(),
+    },
+  });
+
+  // Update user's subscription
+  await User.findByIdAndUpdate(userId, {
+    currentSubscription: {
+      subscriptionId: subscription._id,
+      planId: plan._id,
+      status: "active",
+      expiryDate: endDate,
+    },
+  });
+
+  // Send confirmation email to user
+  try {
+    await sendEmail(
+      user.email,
+      "Gym Subscription Activated",
+      `Your ${plan.name} subscription is now active!`,
+      `<h2>Subscription Confirmation</h2>
+       <p>Dear ${user.fullname},</p>
+       <p>Your ${plan.name} subscription has been activated.</p>
+       <p>Valid till: ${endDate.toLocaleDateString()}</p>
+       <p>Thank you!</p>`
+    );
+  } catch (err) {
+    console.error("User email failed:", err);
+  }
+
+  return sendResponse(
+    res,
+    201,
+    subscription,
+    "Offline subscription created successfully"
+  );
 });

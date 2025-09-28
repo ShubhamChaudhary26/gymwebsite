@@ -13,12 +13,14 @@ import {
   Dumbbell, // ✅ new icon for trainers
   Package,
   CreditCard,
+  CreditCardIcon,
 } from "lucide-react";
 
 // Sidebar.js
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Users", href: "/users", icon: Users },
+  { name: "Plans", href: "/plans", icon: CreditCardIcon },
   { name: "Subscriptions", href: "/subscriptions", icon: CreditCard },
   { name: "Trainers", href: "/trainers", icon: Dumbbell },
   { name: "Products", href: "/products", icon: Package },

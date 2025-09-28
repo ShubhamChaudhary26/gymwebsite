@@ -384,8 +384,16 @@ class ApiService {
   }
 
   // Plan endpoints
-  async getPlans() {
-    return this.request("/plans");
+  // services/api.js mein ye add karo existing Plan endpoints ke saath:
+
+  // Plan endpoints (complete set)
+  async getPlans(includeInactive = false) {
+    const params = includeInactive ? "?includeInactive=true" : "";
+    return this.request(`/plans${params}`);
+  }
+
+  async getPlanById(planId) {
+    return this.request(`/plans/${planId}`);
   }
 
   async createPlan(planData) {
@@ -408,11 +416,79 @@ class ApiService {
     });
   }
 
+  async togglePlanStatus(planId) {
+    return this.request(`/plans/${planId}/toggle-status`, {
+      method: "PATCH",
+    });
+  }
+
   // Payment endpoints (for testing)
   async createTestPayment(userId, planId) {
     return this.request("/admin/payments/test", {
       method: "POST",
       body: JSON.stringify({ userId, planId }),
+    });
+  }
+  // services/api.js mein add karo:
+
+  // Offline Subscription
+  async createOfflineSubscription(subscriptionData) {
+    return this.request("/admin/subscriptions/offline", {
+      method: "POST",
+      body: JSON.stringify(subscriptionData),
+    });
+  }
+
+  // Get single subscription details
+  async getSubscriptionById(subscriptionId) {
+    return this.request(`/admin/subscriptions/${subscriptionId}`);
+  }
+  // services/api.js mein add karo:
+
+  // Extend subscription validity
+  async extendSubscription(subscriptionId, days) {
+    return this.request(`/admin/subscriptions/${subscriptionId}/extend`, {
+      method: "PUT",
+      body: JSON.stringify({ days }),
+    });
+  }
+
+  // Change subscription plan
+  async changeSubscriptionPlan(subscriptionId, newPlanId) {
+    return this.request(`/admin/subscriptions/${subscriptionId}/change-plan`, {
+      method: "PUT",
+      body: JSON.stringify({ planId: newPlanId }),
+    });
+  }
+
+  // Add notes to subscription
+  async addSubscriptionNote(subscriptionId, note) {
+    return this.request(`/admin/subscriptions/${subscriptionId}/notes`, {
+      method: "POST",
+      body: JSON.stringify({ note }),
+    });
+  }
+
+  // Get user's subscription history
+  async getUserSubscriptionHistory(userId) {
+    return this.request(`/admin/users/${userId}/subscription-history`);
+  }
+  // services/api.js mein add karo:
+
+  // Admin initiates renewal for a user
+  // services/api.js - CORRECTED
+  async adminInitiateRenewal(data) {
+    // data = { subscriptionId, planId, paymentMethod }
+    return this.request("/admin/subscriptions/renew", {
+      method: "POST",
+      body: JSON.stringify(data), // ✅ Pura data object bhejo
+    });
+  }
+  // services/api.js
+  async updateSubscription(subscriptionId, data) {
+    return this.request(`/admin/subscriptions/${subscriptionId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
     });
   }
 }

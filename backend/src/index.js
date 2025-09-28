@@ -128,7 +128,7 @@ app.use("/api/v1/payments", paymentRouter);
 app.use("/api/v1/plans", planRouter);
 app.use("/api/v1/admin/auth", adminAuthRouter);
 app.use("/api/v1/admin", adminRouter);
-app.use("/api/v1/admin", adminSubscriptionRouter);
+app.use("/api/v1/admin/subscriptions", adminSubscriptionRouter);
 app.use("/Uploads", uploadsRouter);
 
 startCronJobs();

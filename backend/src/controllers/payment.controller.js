@@ -127,7 +127,6 @@ export const verifyPayment = asyncHandler(async (req, res) => {
   };
 
   await subscription.save();
-
   // Update user's current subscription
   await User.findByIdAndUpdate(subscription.userId._id, {
     currentSubscription: {
@@ -137,9 +136,32 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       expiryDate: endDate,
     },
   });
+  if (subscription.previousSubscriptionId) {
+    // Cancel/expire old subscription
+    await Subscription.findByIdAndUpdate(subscription.previousSubscriptionId, {
+      status: "cancelled",
+    });
 
-  // Send confirmation email
-  const emailHtml = `
+    // Send renewal confirmation
+    const renewalEmailHtml = `
+    <h2>Subscription Renewed Successfully!</h2>
+    <p>Dear ${subscription.userId.fullname},</p>
+    <p>Your <strong>${
+      plan.name
+    }</strong> subscription has been renewed successfully.</p>
+    <p>New validity period: ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}</p>
+    <p>Thank you for continuing with us!</p>
+  `;
+
+    await sendEmail(
+      subscription.userId.email,
+      "Subscription Renewed Successfully",
+      `Your ${plan.name} subscription has been renewed!`,
+      renewalEmailHtml
+    );
+  }
+  // Send confirmation email to USER
+  const userEmailHtml = `
     <h2>Payment Confirmation</h2>
     <p>Dear ${subscription.userId.fullname},</p>
     <p>Your payment for ${plan.name} plan has been successfully processed.</p>
@@ -156,11 +178,86 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       subscription.userId.email,
       "Payment Confirmation - Subscription Activated",
       `Your ${plan.name} plan is now active!`,
-      emailHtml
+      userEmailHtml
     );
   } catch (emailError) {
-    console.error("Failed to send confirmation email:", emailError);
+    console.error("Failed to send user confirmation email:", emailError);
     // Don't throw error, payment is already successful
+  }
+
+  // 🆕 ADMIN EMAIL NOTIFICATION
+  try {
+    const admins = await User.find({ role: "admin" }).select("email fullname");
+
+    for (const admin of admins) {
+      const adminEmailHtml = `
+        <h2>New Gym Subscription Alert! 💪</h2>
+        <p>Hi ${admin.fullname},</p>
+        <p>A new subscription has been activated:</p>
+        <table border="1" cellpadding="10" style="border-collapse: collapse;">
+          <tr>
+            <td><strong>Customer Name:</strong></td>
+            <td>${subscription.userId.fullname}</td>
+          </tr>
+          <tr>
+            <td><strong>Email:</strong></td>
+            <td>${subscription.userId.email}</td>
+          </tr>
+          <tr>
+            <td><strong>Username:</strong></td>
+            <td>${subscription.userId.username}</td>
+          </tr>
+          <tr>
+            <td><strong>Plan:</strong></td>
+            <td>${plan.name}</td>
+          </tr>
+          <tr>
+            <td><strong>Amount:</strong></td>
+            <td>₹${subscription.amount}</td>
+          </tr>
+          <tr>
+            <td><strong>Duration:</strong></td>
+            <td>${plan.duration} days</td>
+          </tr>
+          <tr>
+            <td><strong>Start Date:</strong></td>
+            <td>${startDate.toLocaleDateString()}</td>
+          </tr>
+          <tr>
+            <td><strong>End Date:</strong></td>
+            <td>${endDate.toLocaleDateString()}</td>
+          </tr>
+          <tr>
+            <td><strong>Payment ID:</strong></td>
+            <td>${razorpay_payment_id}</td>
+          </tr>
+          <tr>
+            <td><strong>Order ID:</strong></td>
+            <td>${razorpay_order_id}</td>
+          </tr>
+        </table>
+        <p style="margin-top: 20px;">
+          <a href="${
+            process.env.ADMIN_PANEL_URL || "http://localhost:5174"
+          }/subscriptions" 
+             style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+            View in Admin Panel
+          </a>
+        </p>
+      `;
+
+      await sendEmail(
+        admin.email,
+        `New Subscription: ${subscription.userId.fullname} - ${plan.name} Plan`,
+        `New subscription activated for ${subscription.userId.fullname} - ${plan.name} plan for ₹${subscription.amount}`,
+        adminEmailHtml
+      );
+    }
+
+    console.log(`Admin notifications sent to ${admins.length} admin(s)`);
+  } catch (adminEmailError) {
+    console.error("Failed to send admin notification:", adminEmailError);
+    // Admin email fail ho jaye to bhi payment success rahega
   }
 
   return sendResponse(
@@ -171,6 +268,219 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       message: "Payment verified and subscription activated",
     },
     "Payment successful"
+  );
+});
+
+// controllers/payment.controller.js - Add these functions
+
+// RENEW SUBSCRIPTION (No discounts)
+export const renewSubscription = asyncHandler(async (req, res) => {
+  const { subscriptionId, planId } = req.body;
+  const userId = req.user._id;
+
+  // Get current/expired subscription
+  const currentSub = await Subscription.findOne({
+    _id: subscriptionId,
+    userId: userId,
+    status: { $in: ["active", "grace_period", "expired"] },
+  }).populate("planId");
+
+  if (!currentSub) {
+    throw throwApiError(404, "Subscription not found");
+  }
+
+  // Get the plan (same or new)
+  const plan = await Plan.findById(planId || currentSub.planId._id);
+  if (!plan || !plan.isActive) {
+    throw throwApiError(404, "Plan not found or inactive");
+  }
+
+  // Full price - no discounts
+  const amount = plan.price;
+
+  // Create Razorpay order
+  const options = {
+    amount: amount * 100, // Convert to paise
+    currency: "INR",
+    receipt: `renew_${userId}_${Date.now()}`,
+    notes: {
+      userId: userId.toString(),
+      planId: plan._id.toString(),
+      renewalOf: subscriptionId,
+      type: "renewal",
+    },
+  };
+
+  const order = await razorpay.orders.create(options);
+
+  // Create new pending subscription
+  const newSubscription = await Subscription.create({
+    userId,
+    planId: plan._id,
+    razorpayOrderId: order.id,
+    amount: amount,
+    status: "pending",
+    previousSubscriptionId: subscriptionId,
+    renewalCount: (currentSub.renewalCount || 0) + 1,
+  });
+
+  return sendResponse(
+    res,
+    200,
+    {
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      key: process.env.RAZORPAY_KEY_ID,
+      subscriptionId: newSubscription._id,
+      planName: plan.name,
+      planPrice: amount,
+    },
+    "Renewal order created successfully"
+  );
+});
+
+// CHECK RENEWAL ELIGIBILITY
+export const checkRenewalEligibility = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const subscription = await Subscription.findOne({
+    userId,
+    status: { $in: ["active", "grace_period"] },
+  }).populate("planId");
+
+  if (!subscription) {
+    return sendResponse(
+      res,
+      200,
+      {
+        eligible: false,
+        message: "No active subscription to renew",
+      },
+      "Not eligible for renewal"
+    );
+  }
+
+  const daysUntilExpiry = Math.ceil(
+    (subscription.endDate - new Date()) / (1000 * 60 * 60 * 24)
+  );
+
+  let message = "";
+
+  if (subscription.status === "grace_period") {
+    message = "In grace period - Renew now to restore full access!";
+  } else if (daysUntilExpiry <= 7) {
+    message = "Your subscription is expiring soon. Renew now!";
+  } else {
+    message = "You can renew your subscription anytime.";
+  }
+
+  return sendResponse(
+    res,
+    200,
+    {
+      eligible: true,
+      subscription: {
+        id: subscription._id,
+        planName: subscription.planId.name,
+        planPrice: subscription.planId.price,
+        expiryDate: subscription.endDate,
+        daysUntilExpiry,
+        status: subscription.status,
+      },
+      message,
+    },
+    "Renewal eligibility checked"
+  );
+});
+
+// GET EXPIRY STATUS
+export const getExpiryStatus = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const subscription = await Subscription.findOne({
+    userId,
+    status: { $in: ["active", "grace_period", "expired"] },
+  })
+    .populate("planId")
+    .sort({ createdAt: -1 });
+
+  if (!subscription) {
+    return sendResponse(
+      res,
+      200,
+      {
+        hasSubscription: false,
+        needsRenewal: true,
+      },
+      "No subscription found"
+    );
+  }
+
+  const now = new Date();
+  const daysRemaining = Math.ceil(
+    (subscription.endDate - now) / (1000 * 60 * 60 * 24)
+  );
+  const daysInGracePeriod = subscription.gracePeriodEnd
+    ? Math.ceil((subscription.gracePeriodEnd - now) / (1000 * 60 * 60 * 24))
+    : 0;
+
+  let statusInfo = {
+    status: subscription.status,
+    expiryDate: subscription.endDate,
+    daysRemaining,
+    showWarning: false,
+    warningLevel: "none", // none, low, medium, high, critical
+    message: "",
+    canRenew: true,
+    recommendedAction: "",
+  };
+
+  // Determine warning level and message
+  if (subscription.status === "expired") {
+    statusInfo.showWarning = true;
+    statusInfo.warningLevel = "critical";
+    statusInfo.message = "Your subscription has expired!";
+    statusInfo.recommendedAction = "Purchase a new subscription";
+    statusInfo.canRenew = false;
+  } else if (subscription.status === "grace_period") {
+    statusInfo.showWarning = true;
+    statusInfo.warningLevel = "high";
+    statusInfo.message = `Grace period: ${daysInGracePeriod} days remaining`;
+    statusInfo.recommendedAction = "Renew immediately to restore full access";
+    statusInfo.gracePeriodDays = daysInGracePeriod;
+  } else if (daysRemaining <= 1) {
+    statusInfo.showWarning = true;
+    statusInfo.warningLevel = "critical";
+    statusInfo.message = "Expires tomorrow!";
+    statusInfo.recommendedAction = "Renew now to avoid interruption";
+  } else if (daysRemaining <= 3) {
+    statusInfo.showWarning = true;
+    statusInfo.warningLevel = "high";
+    statusInfo.message = `Only ${daysRemaining} days left!`;
+    statusInfo.recommendedAction = "Renew now to continue";
+  } else if (daysRemaining <= 7) {
+    statusInfo.showWarning = true;
+    statusInfo.warningLevel = "medium";
+    statusInfo.message = `Expires in ${daysRemaining} days`;
+    statusInfo.recommendedAction = "Consider renewal soon";
+  }
+
+  return sendResponse(
+    res,
+    200,
+    {
+      subscription: {
+        id: subscription._id,
+        planName: subscription.planId.name,
+        amount: subscription.amount,
+        startDate: subscription.startDate,
+        endDate: subscription.endDate,
+      },
+      statusInfo,
+      reminders: subscription.remindersSent,
+    },
+    "Expiry status fetched"
   );
 });
 

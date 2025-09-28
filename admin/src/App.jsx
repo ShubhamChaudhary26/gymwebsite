@@ -24,6 +24,7 @@ import Quotes from "./pages/Quotes";
 import QuoteView from "./pages/QuoteView";
 import Products from "./pages/Products";
 import Subscriptions from "./pages/Subscriptions";
+import Plans from "./pages/Plans";
 // Create a client
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ function App() {
               <Route path="products" element={<Products />} />
               <Route path="blogs" element={<Blogs />} />
               <Route path="subscriptions" element={<Subscriptions />} />
+              <Route path="plans" element={<Plans />} />
               <Route path="blogs/create" element={<BlogCreate />} />
               <Route path="blogs/:id/edit" element={<BlogEdit />} />
               <Route path="quotes" element={<Quotes />} />

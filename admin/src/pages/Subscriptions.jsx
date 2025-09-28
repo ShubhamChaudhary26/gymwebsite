@@ -1,4 +1,3 @@
-// pages/Subscriptions.jsx
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
@@ -16,48 +15,52 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectItem } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import OfflineSubscriptionModal from "../components/OfflineSubscriptionModal";
 import {
   Search,
-  CreditCard,
   TrendingUp,
   Users,
-  Calendar,
   DollarSign,
   AlertCircle,
   Download,
   Eye,
+  Edit,
+  Plus,
 } from "lucide-react";
-
+import SimpleSubscriptionDetails from "../components/SimpleSubscriptionDetails";
+import AdminRenewalModal from "@/components/AdminRenewalModal";
+import EditSubscriptionModal from "@/components/EditSubscriptionModal";
 const Subscriptions = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
   const [selectedSubscription, setSelectedSubscription] = useState(null);
+  const [showOfflineModal, setShowOfflineModal] = useState(false);
+  const [renewalCandidate, setRenewalCandidate] = useState(null);
+  const [editCandidate, setEditCandidate] = useState(null);
   const [dateRange, setDateRange] = useState({
     start: "",
     end: "",
   });
 
   // Fetch subscriptions
-  const { data: subscriptions, isLoading } = useQuery({
+  const { data: subscriptionsResponse, isLoading } = useQuery({
+    // Rename
     queryKey: ["subscriptions", statusFilter, planFilter],
     queryFn: () =>
       apiService.getSubscriptions({ status: statusFilter, plan: planFilter }),
   });
 
   // Fetch stats
-  const { data: stats } = useQuery({
+  const { data: statsResponse } = useQuery({
+    // Rename
     queryKey: ["subscription-stats"],
     queryFn: () => apiService.getSubscriptionStats(),
   });
 
+  const subscriptions = subscriptionsResponse?.data || []; // ✅ FIX
+  const stats = statsResponse?.data || {}; // ✅ FIX
   // Cancel subscription mutation
   const cancelMutation = useMutation({
     mutationFn: (subscriptionId) =>
@@ -70,18 +73,37 @@ const Subscriptions = () => {
       toast.error(error.message || "Failed to cancel subscription");
     },
   });
+  const renewMutation = useMutation({
+    mutationFn: (subscriptionId) =>
+      apiService.adminInitiateRenewal(subscriptionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["subscription-stats"] });
+      toast.success("Subscription renewed successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to renew subscription");
+    },
+  });
+  const editMutation = useMutation({
+    mutationFn: ({ subscriptionId, data }) =>
+      apiService.updateSubscription(subscriptionId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+      toast.success("Subscription updated successfully");
+      setEditCandidate(null);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update subscription");
+    },
+  });
 
   // Filter subscriptions
   // pages/Subscriptions.jsx - UPDATE FILTER LOGIC
   const filteredSubscriptions = useMemo(() => {
-    // ✅ FIX: Handle both array and nested data structure
-    const subscriptionList = Array.isArray(subscriptions?.data)
-      ? subscriptions.data
-      : subscriptions?.data?.subscriptions || [];
+    if (!subscriptions || subscriptions.length === 0) return [];
 
-    if (!subscriptionList || subscriptionList.length === 0) return [];
-
-    return subscriptionList.filter((sub) => {
+    return subscriptions.filter((sub) => {
       const matchesSearch =
         sub.userId?.fullname
           ?.toLowerCase()
@@ -96,7 +118,7 @@ const Subscriptions = () => {
 
       return matchesSearch && matchesDate;
     });
-  }, [subscriptions?.data, searchTerm, dateRange]);
+  }, [subscriptions, searchTerm, dateRange]); // ✅ CORRECTED DEPENDENCIES
 
   // Also fix stats display
   const statsData = stats?.data || stats || {};
@@ -132,6 +154,7 @@ const Subscriptions = () => {
       expired: "secondary",
       cancelled: "destructive",
       failed: "destructive",
+      grace_period: "warning",
     };
     return colors[status] || "default";
   };
@@ -146,8 +169,11 @@ const Subscriptions = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Subscription Management</h1>
+      <div className="flex gap-2">
+        <Button onClick={() => setShowOfflineModal(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Offline Subscription
+        </Button>
         <Button onClick={exportToCSV} variant="outline">
           <Download className="h-4 w-4 mr-2" />
           Export CSV
@@ -255,6 +281,7 @@ const Subscriptions = () => {
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="expired">Expired</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectItem value="grace_period">Grace Period</SelectItem>
             </Select>
 
             <Select value={planFilter} onValueChange={setPlanFilter}>
@@ -356,15 +383,33 @@ const Subscriptions = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setEditCandidate(sub)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          {/* ✅ SMART RENEWAL BUTTON */}
+                          {(sub.status === "active" && daysLeft <= 7) ||
+                          sub.status === "grace_period" ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setRenewalCandidate(sub)}
+                              disabled={renewMutation.isLoading}
+                            >
+                              Renew
+                            </Button>
+                          ) : null}
+
                           {sub.status === "active" && (
                             <Button
                               size="sm"
                               variant="destructive"
                               onClick={() => {
                                 if (
-                                  confirm(
-                                    "Are you sure you want to cancel this subscription?"
-                                  )
+                                  confirm("Are you sure you want to cancel?")
                                 ) {
                                   cancelMutation.mutate(sub._id);
                                 }
@@ -385,82 +430,51 @@ const Subscriptions = () => {
       </Card>
 
       {/* Subscription Details Dialog */}
-      <Dialog
+
+      <SimpleSubscriptionDetails
+        subscription={selectedSubscription}
         open={!!selectedSubscription}
-        onOpenChange={() => setSelectedSubscription(null)}
-      >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Subscription Details</DialogTitle>
-          </DialogHeader>
-          {selectedSubscription && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Customer
-                  </label>
-                  <p className="font-medium">
-                    {selectedSubscription.userId?.fullname}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedSubscription.userId?.email}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Plan
-                  </label>
-                  <p className="font-medium">
-                    {selectedSubscription.planId?.name}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatCurrency(selectedSubscription.amount)}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Payment ID
-                  </label>
-                  <p className="font-mono text-sm">
-                    {selectedSubscription.razorpayPaymentId}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Order ID
-                  </label>
-                  <p className="font-mono text-sm">
-                    {selectedSubscription.razorpayOrderId}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Duration
-                  </label>
-                  <p>
-                    {new Date(
-                      selectedSubscription.startDate
-                    ).toLocaleDateString()}{" "}
-                    -{" "}
-                    {new Date(
-                      selectedSubscription.endDate
-                    ).toLocaleDateString()}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Status
-                  </label>
-                  <Badge variant={getStatusColor(selectedSubscription.status)}>
-                    {selectedSubscription.status}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+        onClose={() => setSelectedSubscription(null)}
+      />
+      <OfflineSubscriptionModal
+        open={showOfflineModal}
+        onClose={() => setShowOfflineModal(false)}
+        onSuccess={() => {
+          queryClient.invalidateQueries(["subscriptions"]);
+          queryClient.invalidateQueries(["subscription-stats"]);
+          toast.success("Offline subscription created successfully!");
+          setShowOfflineModal(false);
+        }}
+      />
+      <AdminRenewalModal
+        subscription={renewalCandidate}
+        open={!!renewalCandidate}
+        onClose={() => setRenewalCandidate(null)}
+        onConfirm={(renewalData) => {
+          if (renewalCandidate) {
+            renewMutation.mutate({
+              subscriptionId: renewalCandidate._id,
+              ...renewalData,
+            });
+            setRenewalCandidate(null);
+          }
+        }}
+        isLoading={renewMutation.isLoading}
+      />
+      <EditSubscriptionModal
+        subscription={editCandidate}
+        open={!!editCandidate}
+        onClose={() => setEditCandidate(null)}
+        onConfirm={(data) => {
+          if (editCandidate) {
+            editMutation.mutate({
+              subscriptionId: editCandidate._id,
+              data,
+            });
+          }
+        }}
+        isLoading={editMutation.isLoading}
+      />
     </div>
   );
 };
