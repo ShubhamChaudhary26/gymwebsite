@@ -1,4 +1,3 @@
-// scripts/seedPlans.js
 import dotenv from "dotenv";
 import { Plan } from "../src/models/plan.model.js";
 import { connectDB } from "../src/database/db.js";
