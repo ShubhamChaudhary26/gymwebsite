@@ -19,8 +19,6 @@ export default function LoginPage() {
       // ✅ CORRECTED: apiService.login() already returns parsed JSON
       const data = await apiService.login(email, password);
 
-      // ❌ REMOVE THIS LINE:
-      // const data = await res.json();
 
       // ✅ Direct access to data
       if (!data.success) {
