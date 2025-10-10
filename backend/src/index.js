@@ -83,18 +83,15 @@ app.use(
             defaultSrc: ["'self'"],
             imgSrc: [
               "'self'",
-              "http://localhost:3000",
-              "http://localhost:3001",
               "https://gymwebsite-1cjo.vercel.app", // ✅ add this
-              "https://gymwebsite-r4xc.vercel.app/login",
               "data:",
             ],
             connectSrc: [
               "'self'",
-              "http://localhost:3000",
-              "http://localhost:3001",
+              // "http://localhost:3000",
+              // "http://localhost:3001",
               "https://gymwebsite-1cjo.vercel.app", // ✅ add this
-                "https://gymwebsite-r4xc.vercel.app/login",
+                // "https://gymwebsite-r4xc.vercel.app/login",
             ],
           },
         }
