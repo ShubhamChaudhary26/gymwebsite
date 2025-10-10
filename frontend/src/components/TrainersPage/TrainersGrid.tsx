@@ -95,11 +95,12 @@ export default function TrainersPage() {
               {/* Image Container */}
               <div className="relative h-80 w-full overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-                <img
-                  src={t.image || "/placeholder-trainer.jpg"}
-                  alt={t.name}
-                  className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700"
-                />
+               <img
+  src={t.image ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${t.image}` : "/placeholder-trainer.jpg"}
+  alt={t.name}
+  className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700"
+/>
+
                 
                 {/* Badge Overlay */}
                 <div className="absolute top-4 right-4 z-20">

@@ -81,10 +81,11 @@ const BlogSection = ({ limit }: BlogSectionProps) => {
             >
               <div className="relative w-full h-56 rounded-t-xl bg-black flex items-center justify-center overflow-hidden">
                 <img
-                  src={post.image}
-                  alt={post.title}
-                  className="max-w-full max-h-full object-contain transition-transform duration-300 hover:scale-105"
-                />
+  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${post.image}`}
+  alt={post.title}
+  className="max-w-full max-h-full object-contain transition-transform duration-300 hover:scale-105"
+/>
+
               </div>
 
               <div className="p-6 flex flex-col flex-grow">

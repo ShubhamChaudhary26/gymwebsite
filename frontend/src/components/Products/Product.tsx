@@ -63,11 +63,12 @@ export default function Products({ limit }: ProductsProps) {
       onClick={() => router.push(`/products/${p._id}`)}
     >
       <div className="relative h-64 w-full">
-        <img
-          src={p.photo || "/placeholder-product.jpg"}
-          alt={p.name}
-          className="object-cover w-full h-full"
-        />
+       <img
+  src={p.photo ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${p.photo}` : "/placeholder-product.jpg"}
+  alt={p.name}
+  className="object-cover w-full h-full"
+/>
+
       </div>
       <div className="p-6 flex flex-col justify-between flex-1">
         <div>

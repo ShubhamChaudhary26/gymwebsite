@@ -48,101 +48,101 @@ export function NavbarDemo() {
     <div className="w-full fixed top-0 left-0 z-[1000]">
       <Navbar>
         {/* Desktop Navigation */}
-      {/* Desktop Navigation */}
-<NavBody className="hidden lg:flex">
-  <NavbarLogo />
-  <NavItems items={navItems} />
-  <div className="flex items-center gap-2">
-    {user ? (
-      <div className="flex items-center gap-2">
-        <img
-          src={user.avatar}
-          alt="avatar"
-          className="w-8 h-8 rounded-full border-2 border-white/50"
-        />
-        <span className="text-white font-medium">{user.name}</span>
-        <NavbarButton variant="secondary" onClick={handleLogout}>
-          Logout
-        </NavbarButton>
-      </div>
-    ) : (
-      <>
-        <NavbarButton variant="secondary">
-          <Link href={"/login"}>Login</Link>
-        </NavbarButton>
-        <NavbarButton variant="primary">
-          <Link href={"/register"}>Register</Link>
-        </NavbarButton>
-      </>
-    )}
-  </div>
-</NavBody>
-
-{/* Mobile Navigation */}
-<MobileNav className="lg:hidden">
-  <MobileNavHeader>
-    <NavbarLogo />
-    <MobileNavToggle
-      isOpen={isMobileMenuOpen}
-      onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-    />
-  </MobileNavHeader>
-
-  <MobileNavMenu
-    isOpen={isMobileMenuOpen}
-    onClose={() => setIsMobileMenuOpen(false)}
-  >
-    {navItems.map((item, idx) => (
-      <Link
-        key={`mobile-link-${idx}`}
-        href={item.link}
-        onClick={() => setIsMobileMenuOpen(false)}
-        className="relative text-neutral-600 dark:text-neutral-300"
-      >
-        <span className="block">{item.name}</span>
-      </Link>
-    ))}
-    <div className="flex w-full flex-col gap-4 mt-4">
-      {user ? (
-        <>
+        {/* Desktop Navigation */}
+        <NavBody className="hidden lg:flex">
+          <NavbarLogo />
+          <NavItems items={navItems} />
           <div className="flex items-center gap-2">
-            <img
-              src={user.avatar}
-              alt="avatar"
-              className="w-8 h-8 rounded-full border-2 border-white/50"
-            />
-            <span className="text-white font-medium">{user.name}</span>
-          </div>
-          <NavbarButton
-            onClick={handleLogout}
-            variant="primary"
-            className="w-full"
-          >
-            Logout
-          </NavbarButton>
-        </>
-      ) : (
-        <>
-          <NavbarButton
-            onClick={() => setIsMobileMenuOpen(false)}
-            variant="primary"
-            className="w-full"
-          >
-            Login
-          </NavbarButton>
-          <NavbarButton
-            onClick={() => setIsMobileMenuOpen(false)}
-            variant="primary"
-            className="w-full"
-          >
-            Register
-          </NavbarButton>
-        </>
-      )}
-    </div>
-  </MobileNavMenu>
-</MobileNav>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <img
+                  src={user.avatar || "/default-avatar.png"}
+                  alt="avatar"
+                  className="w-8 h-8 rounded-full border-2 border-white/50"
+                />
 
+                <span className="text-white font-medium">{user.name}</span>
+                <NavbarButton variant="secondary" onClick={handleLogout}>
+                  Logout
+                </NavbarButton>
+              </div>
+            ) : (
+              <>
+                <NavbarButton variant="secondary">
+                  <Link href={"/login"}>Login</Link>
+                </NavbarButton>
+                <NavbarButton variant="primary">
+                  <Link href={"/register"}>Register</Link>
+                </NavbarButton>
+              </>
+            )}
+          </div>
+        </NavBody>
+
+        {/* Mobile Navigation */}
+        <MobileNav className="lg:hidden">
+          <MobileNavHeader>
+            <NavbarLogo />
+            <MobileNavToggle
+              isOpen={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            />
+          </MobileNavHeader>
+
+          <MobileNavMenu
+            isOpen={isMobileMenuOpen}
+            onClose={() => setIsMobileMenuOpen(false)}
+          >
+            {navItems.map((item, idx) => (
+              <Link
+                key={`mobile-link-${idx}`}
+                href={item.link}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="relative text-neutral-600 dark:text-neutral-300"
+              >
+                <span className="block">{item.name}</span>
+              </Link>
+            ))}
+            <div className="flex w-full flex-col gap-4 mt-4">
+              {user ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={user.avatar}
+                      alt="avatar"
+                      className="w-8 h-8 rounded-full border-2 border-white/50"
+                    />
+                    <span className="text-white font-medium">{user.name}</span>
+                  </div>
+                  <NavbarButton
+                    onClick={handleLogout}
+                    variant="primary"
+                    className="w-full"
+                  >
+                    Logout
+                  </NavbarButton>
+                </>
+              ) : (
+                <>
+                  <NavbarButton
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    variant="primary"
+                    className="w-full"
+                  >
+                    Login
+                  </NavbarButton>
+                  <NavbarButton
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    variant="primary"
+                    className="w-full"
+                  >
+                    Register
+                  </NavbarButton>
+                </>
+              )}
+            </div>
+          </MobileNavMenu>
+        </MobileNav>
       </Navbar>
     </div>
   );

@@ -22,7 +22,9 @@ export default function ProductDetails() {
     if (!params.id) return;
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/products/${params.id}`);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/products/${params.id}`
+        );
         if (!res.ok) throw new Error("Failed to fetch product");
         const data = await res.json();
         setProduct(data.data as Product);
@@ -34,10 +36,6 @@ export default function ProductDetails() {
     };
     fetchProduct();
   }, [params.id]);
-
-
-
-
 
   if (!product) {
     return (
@@ -53,26 +51,33 @@ export default function ProductDetails() {
         {/* Product Image */}
         <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-800">
           <img
-            src={product.photo || "/placeholder-product.jpg"}
+            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${product.photo}`}
             alt={product.name}
-            className="w-full h-full object-cover "
+            className="w-full h-full object-cover"
           />
         </div>
 
         {/* Product Details */}
         <div className="text-white flex flex-col justify-between">
           <div>
-            <h1 className="text-4xl font-bold mb-4 text-[#A2CD04]">{product.name}</h1>
-            <p className="text-3xl font-semibold mb-6 text-white">₹{product.price.toFixed(2)}</p>
+            <h1 className="text-4xl font-bold mb-4 text-[#A2CD04]">
+              {product.name}
+            </h1>
+            <p className="text-3xl font-semibold mb-6 text-white">
+              ₹{product.price.toFixed(2)}
+            </p>
 
             <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-3 text-[#A2CD04]">Description</h2>
-              <p className="text-gray-300 leading-relaxed">{product.description}</p>
+              <h2 className="text-xl font-semibold mb-3 text-[#A2CD04]">
+                Description
+              </h2>
+              <p className="text-gray-300 leading-relaxed">
+                {product.description}
+              </p>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0 mt-6">
-            
             <button
               onClick={() => router.back()}
               className="bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 w-full sm:w-auto"

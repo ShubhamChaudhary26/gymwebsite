@@ -25,7 +25,9 @@ export default function BlogDetail() {
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/blogs/${id}`);
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/blogs/${id}`
+        );
         setBlog(res.data?.data);
       } catch (err) {
         console.error("Error fetching blog:", err);
@@ -56,7 +58,7 @@ export default function BlogDetail() {
         {/* Image */}
         <div className="relative w-full h-96 flex items-center justify-center bg-black">
           <img
-            src={blog.image}
+            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${blog.image}`}
             alt={blog.title}
             className="max-w-full max-h-full object-contain rounded-t-2xl transition-transform duration-300 hover:scale-105"
           />
@@ -81,7 +83,9 @@ export default function BlogDetail() {
           <p className="text-gray-400 mb-6">By {blog.author}</p>
 
           {/* Excerpt */}
-          <p className="text-gray-300 text-lg leading-relaxed mb-6">{blog.excerpt}</p>
+          <p className="text-gray-300 text-lg leading-relaxed mb-6">
+            {blog.excerpt}
+          </p>
 
           {/* Content */}
           {blog.content ? (
