@@ -19,11 +19,13 @@ export const generateTokens = async (userId) => {
 
 export const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production", // Only secure in production
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-  path: "/", // Ensure cookie is available for all paths
+  sameSite: "none",         // ✅ cross-site cookie ke liye mandatory
+  secure: process.env.NODE_ENV === "production", // ✅ https ke liye
+  path: "/",                // ✅ ensure cookie accessible site-wide
 };
+
+
 
 // Additional option for access token (shorter expiry)
 export const accessTokenCookieOptions = {

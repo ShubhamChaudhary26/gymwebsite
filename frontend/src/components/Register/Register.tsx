@@ -40,8 +40,6 @@ export default function RegisterPage() {
       // ✅ CORRECTED: Already returns parsed JSON
       const data = await apiService.register(formData);
 
-      // ❌ REMOVE THIS:
-      // const data = await res.json();
 
       if (!data.success) {
         setError(data.message || "Registration failed");
