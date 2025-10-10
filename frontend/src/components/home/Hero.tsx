@@ -2,7 +2,7 @@
 import React from "react";
 import Lightning from "./Lightning";
 import Image from "next/image";
-import gymPerson from "@/assets/banner.svg";
+import gymPerson from "@/assets/banner.png";
 
 const HomePage: React.FC = () => {
   return (
