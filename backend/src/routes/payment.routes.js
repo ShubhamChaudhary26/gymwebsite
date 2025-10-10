@@ -9,11 +9,12 @@ import {
   renewSubscription,
   checkRenewalEligibility,
   getExpiryStatus,
+  getRazorpayConfig,
 } from "../controllers/payment.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
-
+router.get("/config", getRazorpayConfig);
 // User routes (need authentication)
 router.use(verifyJWT); // Apply to all routes below
 

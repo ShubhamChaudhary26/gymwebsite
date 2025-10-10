@@ -8,8 +8,8 @@ import jwt from "jsonwebtoken";
 // Admin specific cookie options
 export const adminCookieOptions = {
   httpOnly: true,
-  secure: false, // <-- TEMP: ✅ Set to false for local testing
-  sameSite: "Lax", // <-- TEMP: Lax for localhost
+  secure: process.env.NODE_ENV === "production", // ✅
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // ✅
   maxAge: 7 * 24 * 60 * 60 * 1000,
   path: "/",
 };

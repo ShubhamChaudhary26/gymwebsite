@@ -8,68 +8,112 @@ import { throwApiError } from "../utils/apiError.js";
 import { sendResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendEmail } from "../utils/sendEmail.js";
-
+// ✅ CHECK: Razorpay instance ko controller ke bahar initialize karo
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// Create Order
+// Verify initialization
+console.log("🔑 Razorpay initialized with key:", process.env.RAZORPAY_KEY_ID);
+export const getRazorpayConfig = asyncHandler(async (req, res) => {
+  return sendResponse(
+    res,
+    200,
+    {
+      key: process.env.RAZORPAY_KEY_ID, // ✅ Backend se aayegi
+    },
+    "Razorpay config fetched"
+  );
+});
 export const createOrder = asyncHandler(async (req, res) => {
   const { planId } = req.body;
   const userId = req.user._id;
 
-  // Check existing active subscription
+  console.log("📝 Create Order Request:");
+  console.log("  - User ID:", userId);
+  console.log("  - Plan ID:", planId);
+
+  // Check existing subscription
   const existingSubscription = await Subscription.findOne({
     userId,
     status: "active",
   });
 
   if (existingSubscription) {
+    console.log("❌ User already has active subscription");
     throw throwApiError(400, "You already have an active subscription");
   }
 
-  // Get plan details
+  // Get plan
   const plan = await Plan.findById(planId);
+  console.log("📦 Plan found:", plan);
+
   if (!plan || !plan.isActive) {
+    console.log("❌ Plan not found or inactive");
     throw throwApiError(404, "Plan not found or inactive");
   }
 
+  // ✅ Generate unique receipt (max 40 chars)
+  const timestamp = Date.now().toString();
+  const randomStr = crypto.randomBytes(4).toString("hex"); // 8 chars
+  const receipt = `${timestamp.slice(-10)}_${randomStr}`; // 19 chars total
+
+  console.log("🧾 Receipt:", receipt);
+
   // Create Razorpay order
   const options = {
-    amount: plan.price * 100, // amount in paise
+    amount: plan.price * 100,
     currency: "INR",
-    receipt: `sub_${userId}_${Date.now()}`,
+    receipt: receipt, // ✅ Max 40 chars
     notes: {
       userId: userId.toString(),
       planId: planId.toString(),
       planName: plan.name,
+      userEmail: req.user.email,
     },
   };
 
-  const order = await razorpay.orders.create(options);
+  console.log("💳 Creating Razorpay order with options:", options);
 
-  // Create pending subscription
-  const subscription = await Subscription.create({
-    userId,
-    planId,
-    razorpayOrderId: order.id,
-    amount: plan.price,
-    status: "pending",
-  });
+  try {
+    const order = await razorpay.orders.create(options);
+    console.log("✅ Razorpay order created:", order);
 
-  return sendResponse(
-    res,
-    200,
-    {
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      key: process.env.RAZORPAY_KEY_ID,
-      subscriptionId: subscription._id,
-    },
-    "Order created successfully"
-  );
+    // Create pending subscription
+    const subscription = await Subscription.create({
+      userId,
+      planId,
+      razorpayOrderId: order.id,
+      amount: plan.price,
+      status: "pending",
+    });
+
+    console.log("✅ Pending subscription created:", subscription._id);
+
+    return sendResponse(
+      res,
+      200,
+      {
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        key: process.env.RAZORPAY_KEY_ID,
+        subscriptionId: subscription._id,
+      },
+      "Order created successfully"
+    );
+  } catch (razorpayError) {
+    console.error("❌ Razorpay order creation failed:", razorpayError);
+    console.error("  - Error details:", razorpayError.error);
+
+    throw throwApiError(
+      500,
+      `Payment gateway error: ${
+        razorpayError.error?.description || razorpayError.message
+      }`
+    );
+  }
 });
 
 // Verify Payment
