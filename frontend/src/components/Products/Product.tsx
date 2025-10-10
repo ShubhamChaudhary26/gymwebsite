@@ -30,7 +30,7 @@ export default function Products({ limit }: ProductsProps) {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/v1/products");
+       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/products`);
         if (!res.ok) throw new Error("Failed to fetch products");
         const data: ApiResponse = await res.json();
         // agar limit pass ho to slice kar do, nahi to saare products

@@ -23,7 +23,7 @@ export default function TrainerDetails() {
     if (!params.id) return;
     const fetchTrainer = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/v1/trainers/${params.id}`);
+     const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/trainers/${params.id}`);
         if (!res.ok) throw new Error("Failed to fetch trainer");
         const data = await res.json();
         setTrainer(data.data);

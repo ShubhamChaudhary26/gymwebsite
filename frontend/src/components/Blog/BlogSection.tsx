@@ -26,7 +26,7 @@ const BlogSection = ({ limit }: BlogSectionProps) => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/v1/blogs");
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/blogs`);
         let allBlogs = res.data?.data || [];
         // Sort by date descending
         allBlogs = allBlogs.sort(

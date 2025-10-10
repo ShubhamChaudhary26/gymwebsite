@@ -43,6 +43,7 @@ const allowedOrigins = [
   "http://localhost:3001", // Next.js frontend
   "http://localhost:5173", // Vite admin
   "http://localhost:5174", // Vite user
+   "https://gymwebsite-1cjo.vercel.app",  // ✅ add this
 ];
 
 app.use(
@@ -89,6 +90,7 @@ app.use(
               "'self'",
               "http://localhost:3000",
               "http://localhost:3001",
+               "https://gymwebsite-1cjo.vercel.app", // ✅ add this
             ],
           },
         }

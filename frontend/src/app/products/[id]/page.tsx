@@ -22,7 +22,7 @@ export default function ProductDetails() {
     if (!params.id) return;
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/v1/products/${params.id}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/products/${params.id}`);
         if (!res.ok) throw new Error("Failed to fetch product");
         const data = await res.json();
         setProduct(data.data as Product);

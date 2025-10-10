@@ -21,7 +21,7 @@ export default function TrainersPage() {
   useEffect(() => {
     const fetchTrainers = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/v1/trainers");
+       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/trainers`);
         if (!res.ok) throw new Error("Failed to fetch trainers");
         const data = await res.json();
         setTrainers(data.data || []);
