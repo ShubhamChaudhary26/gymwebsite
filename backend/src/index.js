@@ -44,6 +44,7 @@ const allowedOrigins = [
   "http://localhost:5173", // Vite admin
   "http://localhost:5174", // Vite user
   "https://gymwebsite-1cjo.vercel.app", // ✅ add this
+  "https://gymwebsite-r4xc.vercel.app/login"
 ];
 
 app.use(
@@ -85,6 +86,7 @@ app.use(
               "http://localhost:3000",
               "http://localhost:3001",
               "https://gymwebsite-1cjo.vercel.app", // ✅ add this
+              "https://gymwebsite-r4xc.vercel.app/login",
               "data:",
             ],
             connectSrc: [
@@ -92,6 +94,7 @@ app.use(
               "http://localhost:3000",
               "http://localhost:3001",
               "https://gymwebsite-1cjo.vercel.app", // ✅ add this
+                "https://gymwebsite-r4xc.vercel.app/login",
             ],
           },
         }
