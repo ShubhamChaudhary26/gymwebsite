@@ -4,7 +4,8 @@ import fetch from "node-fetch";
 
 dotenv.config();
 
-const API_URL = "http://localhost:3000/api/v1";
+const API_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1`;
+
 
 async function debugLogin() {
   try {
