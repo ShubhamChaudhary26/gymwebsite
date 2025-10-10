@@ -328,7 +328,7 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   await user.save({ validateBeforeSave: false });
 
   // Send email
-  const resetUrl = `https://gymwebsite-r4xc.vercel.app/login/reset-password?token=${resetToken}`;
+  const resetUrl = `https://gymwebsite-r4xc.vercel.app/reset-password?token=${resetToken}`;
   const emailText = `Dear ${user.fullname},\n\nYou requested a password reset. Click the link below to reset your password:\n${resetUrl}\n\nThis link expires in 1 hour.\n\nBest regards,\nAdmin Dashboard Team\n\nAmit Mishra\n407- Vishuddha Appartment, Nilkanth Nagar, Chanod Village\nChanod Vapi, Gujarat 396191, India`;
   const emailHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
