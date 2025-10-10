@@ -51,7 +51,8 @@ router.get(/^\/(.+)$/, async (req, res) => {
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:3000", // Add server origin
-      "https://gymwebsite-kohl.vercel.app"
+      "https://gymwebsite-kohl.vercel.app",
+      "https://gymwebsite-r4xc.vercel.app/login"
     ];
     const origin = req.headers.origin;
     if (origin && allowedOrigins.includes(origin)) {
