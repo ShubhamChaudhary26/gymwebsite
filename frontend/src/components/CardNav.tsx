@@ -57,9 +57,9 @@ export function NavbarDemo() {
               <div className="flex items-center gap-2">
                 <img
                   src={
-                    user.avatar
-                      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${user.avatar}`
-                      : "/placeholder-avatar.jpg"
+                    user.avatar?.startsWith("http")
+                      ? user.avatar
+                      : `${process.env.NEXT_PUBLIC_BACKEND_URL}${user.avatar}`
                   }
                   alt="avatar"
                   className="w-8 h-8 rounded-full border-2 border-white/50"
@@ -113,9 +113,9 @@ export function NavbarDemo() {
                   <div className="flex items-center gap-2">
                     <img
                       src={
-                        user.avatar
-                          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${user.avatar}`
-                          : "/placeholder-avatar.jpg"
+                        user.avatar?.startsWith("http")
+                          ? user.avatar
+                          : `${process.env.NEXT_PUBLIC_BACKEND_URL}${user.avatar}`
                       }
                       alt="avatar"
                       className="w-8 h-8 rounded-full border-2 border-white/50"

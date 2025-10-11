@@ -58,7 +58,11 @@ export default function BlogDetail() {
         {/* Image */}
         <div className="relative w-full h-96 flex items-center justify-center bg-black">
           <img
-            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${blog.image}`}
+            src={
+              blog.image?.startsWith("http")
+                ? blog.image
+                : `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${blog.image}`
+            }
             alt={blog.title}
             className="max-w-full max-h-full object-contain rounded-t-2xl transition-transform duration-300 hover:scale-105"
           />

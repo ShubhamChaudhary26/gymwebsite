@@ -118,7 +118,11 @@ export default function TrainerDetails() {
               <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl overflow-hidden shadow-2xl border-2 border-gray-800 group-hover:border-[#A2CD04] transition-all duration-500">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
                 <img
-                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${trainer.image}`}
+                  src={
+                    trainer.image?.startsWith("http")
+                      ? trainer.image
+                      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${trainer.image}`
+                  }
                   alt={trainer.name}
                   className="w-full h-[600px] object-cover group-hover:scale-105 transition-transform duration-700"
                 />

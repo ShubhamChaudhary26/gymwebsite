@@ -51,7 +51,11 @@ export default function ProductDetails() {
         {/* Product Image */}
         <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-800">
           <img
-            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${product.photo}`}
+            src={
+              product.photo?.startsWith("http")
+                ? product.photo
+                : `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${product.photo}`
+            }
             alt={product.name}
             className="w-full h-full object-cover"
           />

@@ -21,7 +21,9 @@ export default function TrainersPage() {
   useEffect(() => {
     const fetchTrainers = async () => {
       try {
-       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/trainers`);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/trainers`
+        );
         if (!res.ok) throw new Error("Failed to fetch trainers");
         const data = await res.json();
         setTrainers(data.data || []);
@@ -34,8 +36,6 @@ export default function TrainersPage() {
     fetchTrainers();
   }, []);
 
- 
-  
   if (error)
     return (
       <div className="bg-black min-h-screen flex items-center justify-center">
@@ -44,7 +44,7 @@ export default function TrainersPage() {
         </div>
       </div>
     );
-  
+
   if (!trainers.length)
     return (
       <div className="bg-black min-h-screen flex items-center justify-center">
@@ -65,14 +65,14 @@ export default function TrainersPage() {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header Section */}
         <div className="text-center mb-16 animate-fade-in">
-          
           <h1 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-[#A2CD04] mb-4">
             Meet Our Trainers
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Certified professionals dedicated to transforming your fitness journey
+            Certified professionals dedicated to transforming your fitness
+            journey
           </p>
-          
+
           <div className="inline-block mb-4 mt-4">
             <span className="bg-[#A2CD04]/20 text-[#A2CD04] px-4 py-2 rounded-full text-sm font-semibold tracking-wider uppercase">
               Expert Team
@@ -91,17 +91,22 @@ export default function TrainersPage() {
             >
               {/* Glow Effect on Hover */}
               <div className="absolute inset-0 bg-gradient-to-br from-[#A2CD04]/0 to-[#A2CD04]/0 group-hover:from-[#A2CD04]/20 group-hover:to-transparent transition-all duration-500 rounded-2xl"></div>
-              
+
               {/* Image Container */}
               <div className="relative h-80 w-full overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-               <img
-  src={t.image ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${t.image}` : "/placeholder-trainer.jpg"}
-  alt={t.name}
-  className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700"
-/>
+                <img
+                  src={
+                    t.image
+                      ? t.image.startsWith("http")
+                        ? t.image
+                        : `${process.env.NEXT_PUBLIC_BACKEND_URL}${t.image}`
+                      : "/placeholder-trainer.jpg"
+                  }
+                  alt={t.name}
+                  className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700"
+                />
 
-                
                 {/* Badge Overlay */}
                 <div className="absolute top-4 right-4 z-20">
                   <div className="bg-[#A2CD04] text-black px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
@@ -123,7 +128,8 @@ export default function TrainersPage() {
                     </p>
                   </div>
                   <p className="text-gray-400 text-sm leading-relaxed line-clamp-2">
-                    {t.description || "Passionate about helping clients achieve their fitness goals with personalized training."}
+                    {t.description ||
+                      "Passionate about helping clients achieve their fitness goals with personalized training."}
                   </p>
                 </div>
 
@@ -137,8 +143,18 @@ export default function TrainersPage() {
                   </div>
                   <div className="flex items-center gap-2 bg-[#A2CD04] group-hover:bg-[#8EBF03] text-black font-bold py-2 px-5 rounded-lg transition-all duration-300 shadow-lg group-hover:shadow-[#A2CD04]/50">
                     <span className="text-sm">View Profile</span>
-                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <svg
+                      className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -149,8 +165,6 @@ export default function TrainersPage() {
             </div>
           ))}
         </div>
-
-        
       </div>
 
       <style jsx>{`

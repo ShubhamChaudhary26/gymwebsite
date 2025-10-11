@@ -13,7 +13,11 @@ export function TrainersSection() {
           <CardBody className="bg-gray-50 relative group/card dark:bg-black w-full h-auto rounded-xl p-6 border">
             <CardItem translateZ="100" className="w-full">
               <img
-                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${trainer.img}`}
+                src={
+                  trainer.img.startsWith("http")
+                    ? trainer.img
+                    : `${process.env.NEXT_PUBLIC_BACKEND_URL}${trainer.img}`
+                }
                 className="h-56 w-full object-cover rounded-xl"
                 alt={trainer.name}
               />
