@@ -53,8 +53,8 @@ const Subscriptions = () => {
   });
 
   // Fetch stats
+  // pages/Subscriptions.jsx - Line 42-43
   const { data: statsResponse } = useQuery({
-    // Rename
     queryKey: ["subscription-stats"],
     queryFn: () => apiService.getSubscriptionStats(),
   });
@@ -120,8 +120,6 @@ const Subscriptions = () => {
     });
   }, [subscriptions, searchTerm, dateRange]); // ✅ CORRECTED DEPENDENCIES
 
-  // Also fix stats display
-  const statsData = stats?.data || stats || {};
   // Export to CSV
   const exportToCSV = () => {
     const csv = [
@@ -192,11 +190,11 @@ const Subscriptions = () => {
             <div className="flex items-center">
               <DollarSign className="h-4 w-4 mr-2 text-green-600" />
               <span className="text-2xl font-bold">
-                {formatCurrency(stats?.totalRevenue || 0)}
+                {formatCurrency(stats.totalRevenue || 0)}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              +{stats?.revenueGrowth || 0}% from last month
+              +{stats.revenueGrowth || 0}% from last month
             </p>
           </CardContent>
         </Card>
@@ -211,11 +209,11 @@ const Subscriptions = () => {
             <div className="flex items-center">
               <Users className="h-4 w-4 mr-2 text-blue-600" />
               <span className="text-2xl font-bold">
-                {stats?.activeSubscriptions || 0}
+                {stats.activeSubscriptions || 0}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {stats?.newThisMonth || 0} new this month
+              {stats.newThisMonth || 0} new this month
             </p>
           </CardContent>
         </Card>
@@ -230,7 +228,7 @@ const Subscriptions = () => {
             <div className="flex items-center">
               <AlertCircle className="h-4 w-4 mr-2 text-orange-600" />
               <span className="text-2xl font-bold">
-                {stats?.expiringSoon || 0}
+                {stats.expiringSoon || 0}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -249,7 +247,7 @@ const Subscriptions = () => {
             <div className="flex items-center">
               <TrendingUp className="h-4 w-4 mr-2 text-purple-600" />
               <span className="text-2xl font-bold">
-                {formatCurrency(stats?.avgValue || 0)}
+                {formatCurrency(stats.avgValue || 0)}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
