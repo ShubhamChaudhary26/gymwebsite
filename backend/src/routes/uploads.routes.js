@@ -42,19 +42,20 @@ router.get(/^\/(.+)$/, async (req, res) => {
     }
 
     // Dynamic CORS based on request origin
-    const allowedOrigins = [
-      "https://gajpatiindustries.com",
-      "https://www.gajpatiindustries.com",
-      "https://admin.gajpatiindustries.com",
-      "https://gajpatiadminfrontend.onrender.com",
-      "https://gajpatifrontend.onrender.com",
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://localhost:3000", // Add server origin
-      "https://gymwebsite-kohl.vercel.app",
-      "https://gymwebsite-r4xc.vercel.app/login",
-      "https://gymwebsite-r4xc.vercel.app"
-    ];
+   const allowedOrigins = [
+  "https://gajpatiindustries.com",
+  "https://www.gajpatiindustries.com",
+  "https://admin.gajpatiindustries.com",
+  "https://gajpatiadminfrontend.onrender.com",
+  "https://gajpatifrontend.onrender.com",
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
+  "https://gymwebsite-kohl.vercel.app",
+  "https://gymwebsite-r4xc.vercel.app",
+  "https://gymwebsite-1cjo.vercel.app"
+];
+
     const origin = req.headers.origin;
     if (origin && allowedOrigins.includes(origin)) {
       res.setHeader("Access-Control-Allow-Origin", origin);
