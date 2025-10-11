@@ -10,7 +10,7 @@ const supabase = createClient(
 
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || "files";
 const PUBLIC_BASE = (
-  process.env.PUBLIC_BASE_URL || process.env.BASE_URL || "https://gymwebsite-kohl.vercel.app"
+  process.env.PUBLIC_BASE_URL
 ).replace(/\/$/, "");
 
 console.log("PUBLIC_BASE_URL:", process.env.PUBLIC_BASE_URL);

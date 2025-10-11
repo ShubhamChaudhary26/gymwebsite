@@ -78,6 +78,7 @@ const Dashboard = () => {
     queryKey: ["dashboard-stats"],
     queryFn: () => apiService.getDashboardStats(),
   });
+  console.log("dash", dashboardData);
 
   const { data: subscriptionStats, isLoading: subStatsLoading } = useQuery({
     queryKey: ["subscription-stats"],
@@ -145,7 +146,7 @@ const Dashboard = () => {
       </div>
 
       {/* Main Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
           title="Total Revenue"
           value={formatCurrency(subStats.totalRevenue || 0)}
@@ -168,16 +169,16 @@ const Dashboard = () => {
           loading={isLoading}
         />
         <StatCard
-          title="Total Trainers"
-          value={stats.totalTrainers || 0}
-          sub="Ready to assist"
-          icon={<Dumbbell className="h-5 w-5 text-purple-600" />}
+          title="Total Blogs"
+          value={stats.totalBlogs || 0} // dashboardData me se le rahe ho
+          sub="Published posts"
+          icon={<BarChart2 className="h-5 w-5 text-purple-600" />}
           loading={isLoading}
         />
       </div>
 
       {/* Revenue Chart & Plan Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Monthly Revenue Trend</CardTitle>
