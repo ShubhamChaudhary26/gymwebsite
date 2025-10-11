@@ -78,7 +78,7 @@ export default function Products({ limit }: ProductsProps) {
             <div className="relative h-64 w-full">
               <img
                 src={
-                  p.photo?.startsWith("http")
+                  p.photo?.startsWith("https")
                     ? p.photo
                     : `${process.env.NEXT_PUBLIC_BACKEND_URL}${p.photo}`
                 }
