@@ -9,9 +9,9 @@ const supabase = createClient(
 );
 
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || "files";
-const PUBLIC_BASE = (
-  process.env.PUBLIC_BASE_URL || "http://localhost:3000"
-).replace(/\/$/, "");
+const PUBLIC_BASE = (process.env.PUBLIC_BASE_URL || "http://localhost:3000").replace(/\/$/, "");
+console.log("PUBLIC_BASE_URL:", process.env.PUBLIC_BASE_URL);
+
 
 // Build your-domain URL for a storage key
 export const buildProxyUrl = (key) => `${PUBLIC_BASE}/Uploads/${key}`;
