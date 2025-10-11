@@ -78,9 +78,9 @@ export default function Products({ limit }: ProductsProps) {
             <div className="relative h-64 w-full">
               <img
                 src={
-                  p.photo
-                    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${p.photo}`
-                    : "/placeholder-product.jpg"
+                  p.photo?.startsWith("http")
+                    ? p.photo
+                    : `${process.env.NEXT_PUBLIC_BACKEND_URL}${p.photo}`
                 }
                 alt={p.name}
                 className="object-cover w-full h-full"
