@@ -43,9 +43,13 @@ const allowedOrigins = [
   "http://localhost:3001", // Next.js frontend
   "http://localhost:5173", // Vite admin
   "http://localhost:5174", // Vite user
+  //backend
+  "https://gymwebsite-gamma-silk.vercel.app",
+ //frontend
   "https://gymwebsite-gamma.vercel.app", // ✅ add this
-  "https://gymwebsite-r4xc.vercel.app/login", 
-  "https://gymwebsite-r4xc.vercel.app", 
+  //admin
+ "https://gymwebsite-k43i.vercel.app/login", 
+  "https://gymwebsite-k43i.vercel.app", 
 ];
 
 app.use(
@@ -85,8 +89,8 @@ app.use(
             imgSrc: [
               "'self'",
               "https://gymwebsite-gamma.vercel.app", // ✅ add this
-              "https://gymwebsite-r4xc.vercel.app/login",
-              "https://gymwebsite-r4xc.vercel.app",
+             "https://gymwebsite-k43i.vercel.app/login",
+              "https://gymwebsite-k43i.vercel.app",
               "data:",
             ],
             connectSrc: [
@@ -94,8 +98,8 @@ app.use(
               // "http://localhost:3000",
               // "http://localhost:3001",
               "https://gymwebsite-gamma.vercel.app", // ✅ add this
-              "https://gymwebsite-r4xc.vercel.app/login",
-              "https://gymwebsite-r4xc.vercel.app",
+             "https://gymwebsite-k43i.vercel.app/login",
+              "https://gymwebsite-k43i.vercel.app",
             ],
           },
         }
