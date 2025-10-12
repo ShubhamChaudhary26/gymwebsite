@@ -89,7 +89,7 @@ const BlogSection = ({ limit }: BlogSectionProps) => {
                       : `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${post.image}`
                   }
                   alt={post.title}
-                  className="max-w-full max-h-full object-contain transition-transform duration-300 hover:scale-105"
+                  className="max-w-full max-h-full object-contain transition-transform duration-300 hover:scale-105 "
                 />
               </div>
 
