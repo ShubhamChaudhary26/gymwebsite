@@ -63,7 +63,7 @@ const BlogSection = ({ limit }: BlogSectionProps) => {
   }
 
   return (
-    <section className="py-20 bg-background relative overflow-hidden">
+    <section className=" bg-background  min-h-screen py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <h2 className="textHeadingmobile md:textHeadinglaptop">
@@ -89,7 +89,7 @@ const BlogSection = ({ limit }: BlogSectionProps) => {
                       : `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${post.image}`
                   }
                   alt={post.title}
-                  className="max-w-full max-h-full object-contain transition-transform duration-300 hover:scale-105 "
+                  className="max-w-full max-h-full object-contain transition-transform duration-300 hover:scale-105"
                 />
               </div>
 

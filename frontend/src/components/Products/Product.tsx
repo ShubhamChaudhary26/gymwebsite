@@ -107,7 +107,7 @@ export default function Products({ limit }: ProductsProps) {
     );
 
   return (
-    <div className="bg-gradient-to-b from-black via-gray-900 to-black min-h-screen py-2 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="bg-gradient-to-b py-20 from-black via-gray-900 to-black min-h-screen px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 -right-40 w-96 h-96 bg-[#A2CD04] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float"></div>

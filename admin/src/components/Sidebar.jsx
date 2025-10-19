@@ -14,6 +14,7 @@ import {
   Package,
   CreditCard,
   CreditCardIcon,
+  Video
 } from "lucide-react";
 
 // Sidebar.js
@@ -23,6 +24,7 @@ const navigation = [
   { name: "Plans", href: "/plans", icon: CreditCardIcon },
   { name: "Subscriptions", href: "/subscriptions", icon: CreditCard },
   { name: "Trainers", href: "/trainers", icon: Dumbbell },
+  { name: "Videos", href: "/videos", icon: Video },
   { name: "Products", href: "/products", icon: Package },
   { name: "Blogs", href: "/blogs", icon: FileText },
   { name: "Quotes", href: "/quotes", icon: MessageSquareQuote },

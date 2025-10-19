@@ -1,4 +1,4 @@
-// api.js (Fixed Version with Correct Endpoints)
+// admin/src/services/api.js (Complete Updated Version)
 class ApiService {
   constructor() {
     this.baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -109,7 +109,7 @@ class ApiService {
     }
   }
 
-  // Auth endpoints
+  // ==================== AUTH ENDPOINTS ====================
   async login(credentials) {
     console.log("🔐 Attempting admin login...");
     return this.request("/admin/auth/login", {
@@ -131,6 +131,7 @@ class ApiService {
       method: "POST",
     });
   }
+
   async refreshToken() {
     console.log("🔄 Refreshing admin token...");
     try {
@@ -161,7 +162,7 @@ class ApiService {
     }
   }
 
-  // User Management endpoints
+  // ==================== USER MANAGEMENT ENDPOINTS ====================
   async getUsers(params = {}) {
     const queryString = new URLSearchParams(params).toString();
     return this.request(`/admin/users?${queryString}`);
@@ -210,12 +211,12 @@ class ApiService {
     });
   }
 
-  // Dashboard Stats
+  // ==================== DASHBOARD ENDPOINTS ====================
   async getDashboardStats() {
     return this.request("/admin/dashboard/stats");
   }
 
-  // Blogs endpoints (with FormData for image upload)
+  // ==================== BLOG ENDPOINTS ====================
   async getBlogs(params = {}) {
     const queryString = new URLSearchParams(params).toString();
     return this.request(`/blogs?${queryString}`);
@@ -247,7 +248,7 @@ class ApiService {
     });
   }
 
-  // Inquiries endpoints
+  // ==================== INQUIRY ENDPOINTS ====================
   async getInquiries(params = {}) {
     const queryString = new URLSearchParams(params).toString();
     return this.request(`/inquires?${queryString}`);
@@ -277,7 +278,7 @@ class ApiService {
     });
   }
 
-  // Quotes endpoints
+  // ==================== QUOTES ENDPOINTS ====================
   async getQuotes(params = {}) {
     const queryString = new URLSearchParams(params).toString();
     return this.request(`/quotes?${queryString}`);
@@ -307,7 +308,7 @@ class ApiService {
     });
   }
 
-  // Subscribers endpoints
+  // ==================== SUBSCRIBER ENDPOINTS ====================
   async getSubscribers(params = {}) {
     const queryString = new URLSearchParams(params).toString();
     return this.request(`/subscribers?${queryString}`);
@@ -318,9 +319,8 @@ class ApiService {
       method: "DELETE",
     });
   }
-  // api.js
 
-  // 🆕 Trainer endpoints
+  // ==================== TRAINER ENDPOINTS ====================
   async getTrainers() {
     return this.request("/trainers", { method: "GET" });
   }
@@ -329,7 +329,7 @@ class ApiService {
     return this.request("/trainers/create", {
       method: "POST",
       body: formData,
-      headers: {}, // ❌ content-type auto handle by browser
+      headers: {}, // Content-type auto handled by browser for FormData
     });
   }
 
@@ -344,7 +344,8 @@ class ApiService {
   async deleteTrainer(id) {
     return this.request(`/trainers/${id}`, { method: "DELETE" });
   }
-  // api.js Product endpoints (already got most of them probably)
+
+  // ==================== PRODUCT ENDPOINTS ====================
   async getProducts() {
     return this.request("/products", { method: "GET" });
   }
@@ -353,7 +354,7 @@ class ApiService {
     return this.request("/products/create", {
       method: "POST",
       body: formData,
-      headers: {}, // don't set content-type for FormData
+      headers: {}, // Don't set content-type for FormData
     });
   }
 
@@ -368,6 +369,8 @@ class ApiService {
   async deleteProduct(id) {
     return this.request(`/products/${id}`, { method: "DELETE" });
   }
+
+  // ==================== SUBSCRIPTION ENDPOINTS ====================
   async getSubscriptions(params = {}) {
     const queryString = new URLSearchParams(params).toString();
     return this.request(`/admin/subscriptions?${queryString}`);
@@ -383,10 +386,58 @@ class ApiService {
     });
   }
 
-  // Plan endpoints
-  // services/api.js mein ye add karo existing Plan endpoints ke saath:
+  async createOfflineSubscription(subscriptionData) {
+    return this.request("/admin/subscriptions/offline", {
+      method: "POST",
+      body: JSON.stringify(subscriptionData),
+    });
+  }
 
-  // Plan endpoints (complete set)
+  async getSubscriptionById(subscriptionId) {
+    return this.request(`/admin/subscriptions/${subscriptionId}`);
+  }
+
+  async extendSubscription(subscriptionId, days) {
+    return this.request(`/admin/subscriptions/${subscriptionId}/extend`, {
+      method: "PUT",
+      body: JSON.stringify({ days }),
+    });
+  }
+
+  async changeSubscriptionPlan(subscriptionId, newPlanId) {
+    return this.request(`/admin/subscriptions/${subscriptionId}/change-plan`, {
+      method: "PUT",
+      body: JSON.stringify({ planId: newPlanId }),
+    });
+  }
+
+  async addSubscriptionNote(subscriptionId, note) {
+    return this.request(`/admin/subscriptions/${subscriptionId}/notes`, {
+      method: "POST",
+      body: JSON.stringify({ note }),
+    });
+  }
+
+  async getUserSubscriptionHistory(userId) {
+    return this.request(`/admin/users/${userId}/subscription-history`);
+  }
+
+  async adminInitiateRenewal(data) {
+    // data = { subscriptionId, planId, paymentMethod }
+    return this.request("/admin/subscriptions/renew", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateSubscription(subscriptionId, data) {
+    return this.request(`/admin/subscriptions/${subscriptionId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // ==================== PLAN ENDPOINTS ====================
   async getPlans(includeInactive = false) {
     const params = includeInactive ? "?includeInactive=true" : "";
     return this.request(`/plans${params}`);
@@ -422,74 +473,71 @@ class ApiService {
     });
   }
 
-  // Payment endpoints (for testing)
+  // ==================== PAYMENT ENDPOINTS ====================
   async createTestPayment(userId, planId) {
     return this.request("/admin/payments/test", {
       method: "POST",
       body: JSON.stringify({ userId, planId }),
     });
   }
-  // services/api.js mein add karo:
 
-  // Offline Subscription
-  async createOfflineSubscription(subscriptionData) {
-    return this.request("/admin/subscriptions/offline", {
-      method: "POST",
-      body: JSON.stringify(subscriptionData),
-    });
+  // ==================== ABOUT PAGE ENDPOINTS ====================
+  
+  /**
+   * Get About page data (Public endpoint)
+   * @returns {Promise<Object>} About page data including YouTube link, mission, vision, stats
+   */
+  async getAboutData() {
+    try {
+      console.log("📄 Fetching About page data...");
+      return await this.request("/about", {
+        method: "GET",
+      });
+    } catch (error) {
+      console.error("❌ Failed to fetch About data:", error);
+      throw error;
+    }
   }
 
-  // Get single subscription details
-  async getSubscriptionById(subscriptionId) {
-    return this.request(`/admin/subscriptions/${subscriptionId}`);
-  }
-  // services/api.js mein add karo:
-
-  // Extend subscription validity
-  async extendSubscription(subscriptionId, days) {
-    return this.request(`/admin/subscriptions/${subscriptionId}/extend`, {
-      method: "PUT",
-      body: JSON.stringify({ days }),
-    });
-  }
-
-  // Change subscription plan
-  async changeSubscriptionPlan(subscriptionId, newPlanId) {
-    return this.request(`/admin/subscriptions/${subscriptionId}/change-plan`, {
-      method: "PUT",
-      body: JSON.stringify({ planId: newPlanId }),
-    });
-  }
-
-  // Add notes to subscription
-  async addSubscriptionNote(subscriptionId, note) {
-    return this.request(`/admin/subscriptions/${subscriptionId}/notes`, {
-      method: "POST",
-      body: JSON.stringify({ note }),
-    });
+  /**
+   * Update About page data (Admin only)
+   * @param {Object} aboutData - About page data to update
+   * @param {string} aboutData.youtubeLink - YouTube video URL or embed link
+   * @param {string} aboutData.title - Page title
+   * @param {string} aboutData.description - Page description
+   * @param {string} aboutData.mission - Mission statement
+   * @param {string} aboutData.vision - Vision statement
+   * @param {Array} aboutData.stats - Statistics array with label, value, icon
+   * @param {Array} [aboutData.teamMembers] - Optional team members array
+   * @returns {Promise<Object>} Updated about page data
+   */
+  async updateAboutData(aboutData) {
+    try {
+      console.log("✏️ Updating About page data...", aboutData);
+      return await this.request("/about", {
+        method: "PUT",
+        body: JSON.stringify(aboutData),
+      });
+    } catch (error) {
+      console.error("❌ Failed to update About data:", error);
+      throw error;
+    }
   }
 
-  // Get user's subscription history
-  async getUserSubscriptionHistory(userId) {
-    return this.request(`/admin/users/${userId}/subscription-history`);
-  }
-  // services/api.js mein add karo:
-
-  // Admin initiates renewal for a user
-  // services/api.js - CORRECTED
-  async adminInitiateRenewal(data) {
-    // data = { subscriptionId, planId, paymentMethod }
-    return this.request("/admin/subscriptions/renew", {
-      method: "POST",
-      body: JSON.stringify(data), // ✅ Pura data object bhejo
-    });
-  }
-  // services/api.js
-  async updateSubscription(subscriptionId, data) {
-    return this.request(`/admin/subscriptions/${subscriptionId}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
+  /**
+   * Reset About page to default values (Admin only)
+   * @returns {Promise<Object>} Default about page data
+   */
+  async resetAboutData() {
+    try {
+      console.log("🔄 Resetting About page to default...");
+      return await this.request("/about", {
+        method: "DELETE",
+      });
+    } catch (error) {
+      console.error("❌ Failed to reset About data:", error);
+      throw error;
+    }
   }
 }
 

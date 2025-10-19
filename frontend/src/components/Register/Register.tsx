@@ -1,7 +1,6 @@
-// app/register/page.tsx
 "use client";
 import { useState } from "react";
-import { User, Mail, Lock, UserPlus } from "lucide-react";
+import { User, Mail, Lock, UserPlus, X } from "lucide-react";
 import apiService from "@/lib/api";
 
 export default function RegisterPage() {
@@ -14,6 +13,7 @@ export default function RegisterPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showToast, setShowToast] = useState(false); // ✅ Toast state
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
@@ -37,15 +37,16 @@ export default function RegisterPage() {
       formData.append("password", form.password);
       if (form.avatar) formData.append("avatar", form.avatar);
 
-      // ✅ CORRECTED: Already returns parsed JSON
       const data = await apiService.register(formData);
-
 
       if (!data.success) {
         setError(data.message || "Registration failed");
       } else {
-        alert("✅ Registration successful! Please login.");
-        window.location.href = "/login";
+        setShowToast(true);
+
+        setTimeout(() => {
+          window.location.href = "/login"; // redirect after 2s
+        }, 2000);
       }
     } catch (err: any) {
       setError(err.message || "Something went wrong");
@@ -56,6 +57,7 @@ export default function RegisterPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-black relative overflow-hidden px-4 mt-10">
+      {/* Background blobs */}
       <div className="absolute w-72 h-72 bg-green-400/20 blur-3xl rounded-full -top-20 -left-20"></div>
       <div className="absolute w-72 h-72 bg-green-400/10 blur-3xl rounded-full bottom-0 right-0"></div>
 
@@ -154,6 +156,33 @@ export default function RegisterPage() {
           </a>
         </p>
       </form>
+
+      {/* ✅ Toast Notification */}
+  {showToast && (
+  <div className="fixed top-20 left-1/2.5 -translate-x-1/2 bg-green-500 text-white px-5 sm:px-8 py-3 sm:py-4 rounded-xl shadow-xl flex items-center gap-3 max-w-[90%] sm:max-w-md z-50 animate-fade-in">
+    <span className="text-sm sm:text-base font-medium">
+      ✅ Registration successful! Please login.
+    </span>
+    <X
+      className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
+      onClick={() => setShowToast(false)}
+    />
+  </div>
+)}
+
+
+
+      <style jsx>{`
+    @keyframes fade-in {
+  0% { opacity: 0; transform: translateY(-30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+
+      `}</style>
     </div>
   );
 }

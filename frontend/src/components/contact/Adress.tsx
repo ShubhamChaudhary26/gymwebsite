@@ -45,7 +45,7 @@ export function Address() {
 
   return (
     <>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto w-full py-12 px-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto w-full py-1 px-6">
 
         {/* Address */}
         <div className="scroll-animate opacity-0 slide-up col-span-1 lg:col-span-2" style={{ animationDelay: '0.1s' }}>

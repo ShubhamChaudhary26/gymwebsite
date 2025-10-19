@@ -96,7 +96,7 @@ export default function TrainersPage() {
     );
 
   return (
-    <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Animated Background with movement */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 -right-40 w-96 h-96 bg-[#A2CD04] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float"></div>
@@ -107,9 +107,10 @@ export default function TrainersPage() {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header Section with enhanced animation */}
         <div className="text-center mb-16 scroll-animate opacity-0">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-[#A2CD04] mb-6 animate-gradient">
-            Meet Our Trainers
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+            Meet Our <span className="text-[#A2CD04]">Trainers</span>
           </h1>
+          
           <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-6">
             Certified professionals dedicated to transforming your fitness journey
           </p>

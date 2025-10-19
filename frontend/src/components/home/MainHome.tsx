@@ -1,4 +1,5 @@
 "use client";
+import React, { useEffect, useState } from "react";
 import Hero from "@/components/home/Hero";
 import StatsSection from "@/components/home/stats";
 import PricingSection from "@/components/Pricing/Price";
@@ -9,7 +10,15 @@ import Contact from "@/components/contact/contact";
 import { InfiniteMovingCardsDemo } from "./TestimonialsSection";
 import ChromaGrid from "../TrainersPage/TrainersGrid";
 import Products from "../Products/Product";
+import AboutVideos from "../about/AboutVideo";
+import apiService from "@/lib/api"; // same as About page
 
+interface VideoItem {
+  youtubeLink: string;
+  topic: string;
+  description: string;
+  order: number;
+}
 const techLogos = [
   // Gym Nutrition / Fitness related with company logos
   {
@@ -46,71 +55,34 @@ const techLogos = [
     href: "/products/muscleblaze",
   },
 ];
-const items = [
-  {
-    image: "https://i.pravatar.cc/300?img=11",
-    title: "Rohit Sharma",
-    subtitle: "Strength Trainer",
-    handle: "@rohitgym",
-    borderColor: "#A2CD04",
-    gradient: "linear-gradient(145deg, #A2CD04, #000)",
-    url: "https://instagram.com/rohitgym",
-  },
-  {
-    image: "https://i.pravatar.cc/300?img=12",
-    title: "Anjali Mehta",
-    subtitle: "Yoga Instructor",
-    handle: "@anjaliyoga",
-    borderColor: "#A2CD04",
-    gradient: "linear-gradient(180deg, #A2CD04, #000)",
-    url: "https://instagram.com/anjaliyoga",
-  },
-  {
-    image: "https://i.pravatar.cc/300?img=13",
-    title: "Vikram Patel",
-    subtitle: "Cardio Specialist",
-    handle: "@vikramcardio",
-    borderColor: "#A2CD04",
-    gradient: "linear-gradient(135deg, #A2CD04, #000)",
-    url: "https://instagram.com/vikramcardio",
-  },
-  {
-    image: "https://i.pravatar.cc/300?img=14",
-    title: "Sneha Reddy",
-    subtitle: "Personal Trainer",
-    handle: "@sneha_fitness",
-    borderColor: "#A2CD04",
-    gradient: "linear-gradient(120deg, #A2CD04, #000)",
-    url: "https://instagram.com/sneha_fitness",
-  },
-  {
-    image: "https://i.pravatar.cc/300?img=15",
-    title: "Arjun Singh",
-    subtitle: "Crossfit Coach",
-    handle: "@arjun_crossfit",
-    borderColor: "#A2CD04",
-    gradient: "linear-gradient(150deg, #A2CD04, #000)",
-    url: "https://instagram.com/arjun_crossfit",
-  },
-  {
-    image: "https://i.pravatar.cc/300?img=16",
-    title: "Priya Desai",
-    subtitle: "Pilates Trainer",
-    handle: "@priyapilates",
-    borderColor: "#A2CD04",
-    gradient: "linear-gradient(135deg, #A2CD04, #000)",
-    url: "https://instagram.com/priyapilates",
-  },
-];
 
 const MainHome = () => {
+  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchVideos();
+  }, []);
+
+  const fetchVideos = async () => {
+    try {
+      const response = await apiService.getAboutData(); // same API call as About page
+      if (response.success && response.data?.videos) {
+        setVideos(response.data.videos);
+      }
+    } catch (err) {
+      console.error("Error fetching videos:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <main>
+    <main className="bg-black text-white">
       <Hero />
 
-      <div
-        style={{ height: "100px", position: "relative", overflow: "hidden" }}
-      >
+      {/* logo loop */}
+      <div style={{ height: "100px", position: "relative", overflow: "hidden" }}>
         <div className="mt-10">
           <LogoLoop
             logos={techLogos}
@@ -126,27 +98,49 @@ const MainHome = () => {
           />
         </div>
       </div>
+
       <div className="relative my-10 h-auto md:h-auto sm:h-[2600px]">
-        <ChromaGrid {...({ radius: 300, damping: 0.45, fadeOut: 0.6, ease: "power3.out", limit: 3 } as any)} />
+        <ChromaGrid
+          {...({
+            radius: 300,
+            damping: 0.45,
+            fadeOut: 0.6,
+            ease: "power3.out",
+            limit: 3,
+          } as any)}
+        />
       </div>
-      <div className="my-10">
+
+    <div className="py-0 ">
         <StatsSection />
       </div>
-      <div className="my-10">
+
+      {/* ✅ AboutVideos component dynamically loaded */}
+     <div className="py-0 ">
+        {loading ? (
+          <div className="flex justify-center py-10 text-gray-400">Loading videos...</div>
+        ) : (
+          <AboutVideos videos={videos} />
+        )}
+      </div>
+
+      <div className="py-0 ">
         <PricingSection />
       </div>
-      <div className="my-10 ">
-        <Products limit={6} />
 
+      <div className="py-0 ">
+        <Products limit={6} />
       </div>
 
-      <div className="my-10">
+     <div className="py-0 ">
         <FAQSection />
       </div>
-      <div className="my-10">
+
+     <div className="py-0 ">
         <InfiniteMovingCardsDemo />
       </div>
-      <div className="my-10">
+
+      <div className="py-0 ">
         <BlogSection limit={3} />
       </div>
 

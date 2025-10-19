@@ -212,7 +212,7 @@ const PricingPage = () => {
   }
 
   return (
-    <section className="py-10 relative text-white bg-gradient-to-b from-black via-gray-900 to-black overflow-hidden">
+    <section className="py-5 relative text-white bg-gradient-to-b from-black via-gray-900 to-black overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-48 w-96 h-96 bg-[#A2CD04] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float"></div>

@@ -25,6 +25,7 @@ import QuoteView from "./pages/QuoteView";
 import Products from "./pages/Products";
 import Subscriptions from "./pages/Subscriptions";
 import Plans from "./pages/Plans";
+import YoutubeGrid from "./pages/YoutubeGrid";
 // Create a client
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ function App() {
               <Route path="trainers" element={<Trainers />} />
               <Route path="products" element={<Products />} />
               <Route path="blogs" element={<Blogs />} />
+              <Route path="videos" element={<YoutubeGrid />} />
               <Route path="subscriptions" element={<Subscriptions />} />
               <Route path="plans" element={<Plans />} />
               <Route path="blogs/create" element={<BlogCreate />} />

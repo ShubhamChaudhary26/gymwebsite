@@ -124,7 +124,7 @@ const Header = ({
                   toast.success("Logged out successfully", {
                     id: loadingToast,
                   });
-                  window.location.href = "/login";
+                  // window.location.href = "/login";
                 } catch (error) {
                   toast.error("Logout failed", {
                     id: loadingToast,

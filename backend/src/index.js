@@ -148,6 +148,7 @@ import planRouter from "./routes/plan.routes.js";
 import adminAuthRouter from "./routes/adminAuth.routes.js";
 import adminRouter from "./routes/admin.routes.js";
 import { startCronJobs } from "./utils/cronJobs.js";
+import aboutRouter from "./routes/about.routes.js";
 
 // ========== APPLY ROUTERS ==========
 app.get("/", async (req, res) => {
@@ -166,7 +167,7 @@ app.use("/api/v1/admin/auth", adminAuthRouter);
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/admin/subscriptions", adminSubscriptionRouter);
 app.use("/Uploads", uploadsRouter);
-
+app.use("/api/v1/about", aboutRouter); // ✅ ADD THIS LINE
 // Start cron jobs
 startCronJobs();
 

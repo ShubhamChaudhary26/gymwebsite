@@ -95,7 +95,7 @@ const FAQSection = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(0);
 
   return (
-    <section className=" section-dark bg-black">
+    <section className="py-10 section-dark bg-black">
           <div className="text-center">
             <h2 className="textHeadingmobile md:textHeadinglaptop">
               Frequently Asked <span className="text-default">Questions</span>

@@ -1,7 +1,6 @@
-// app/login/page.tsx
 "use client";
 import { useState } from "react";
-import { Mail, Lock, LogIn } from "lucide-react";
+import { Mail, Lock, LogIn, X } from "lucide-react";
 import apiService from "@/lib/api";
 
 export default function LoginPage() {
@@ -9,6 +8,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showToast, setShowToast] = useState(false); // ✅ Toast state
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,27 +16,30 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // ✅ CORRECTED: apiService.login() already returns parsed JSON
       const data = await apiService.login(email, password);
 
-
-      // ✅ Direct access to data
       if (!data.success) {
         setError(data.message || "Login failed");
         return;
       }
 
-      // ✅ Save user info (NOT token - backend handles cookies)
       if (data.data?.user) {
-        localStorage.setItem("user", JSON.stringify({
-          name: data.data.user.fullname,
-          email: data.data.user.email,
-          avatar: data.data.user.avatar,
-        }));
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            name: data.data.user.fullname,
+            email: data.data.user.email,
+            avatar: data.data.user.avatar,
+          })
+        );
       }
 
-      alert("✅ Login successful!");
-      window.location.href = "/";
+      // ✅ Show toast instead of alert
+      setShowToast(true);
+
+      setTimeout(() => {
+        window.location.href = "/"; // redirect after 2s
+      }, 2000);
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     } finally {
@@ -46,6 +49,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-black relative overflow-hidden">
+      {/* Background blobs */}
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-green-500/20 rounded-full blur-3xl"></div>
       <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
 
@@ -96,6 +100,27 @@ export default function LoginPage() {
           </a>
         </p>
       </form>
+
+      {/* ✅ Toast Notification */}
+      {showToast && (
+     <div className="fixed top-20 left-1/2.5 -translate-x-1/2 bg-green-500 text-white px-5 sm:px-8 py-3 sm:py-4 rounded-xl shadow-xl flex items-center gap-3 max-w-[90%] sm:max-w-md z-50 animate-fade-in">
+          <span>✅ Login successful!</span>
+          <X
+            className="w-5 h-5 cursor-pointer"
+            onClick={() => setShowToast(false)}
+          />
+        </div>
+      )}
+
+      <style jsx>{`
+           @keyframes fade-in {
+  0% { opacity: 0; transform: translateY(-30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+      `}</style>
     </div>
   );
 }

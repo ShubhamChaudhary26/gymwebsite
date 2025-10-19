@@ -1,7 +1,6 @@
-// lib/api.ts
+// lib/api.ts (COMPLETE UPDATED VERSION)
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ;
-
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 class ApiService {
     private isRefreshing = false;
@@ -54,12 +53,12 @@ class ApiService {
                     this.isRefreshing = true;
 
                     try {
-                        const refreshResponse = await this.refreshToken();
+                        await this.refreshToken();
                         console.log("🔄 Token refreshed successfully");
 
                         this.processQueue(null, "refreshed");
 
-                        // Retry original request
+                        // Retry original request with NEW fetch call
                         console.log("🔄 Retrying original request");
                         const retryResponse = await fetch(url, config);
 
@@ -88,16 +87,24 @@ class ApiService {
                 } else {
                     // Queue the request if already refreshing
                     return new Promise((resolve, reject) => {
-                        this.failedQueue.push({ resolve, reject });
-                    })
-                        .then(() => {
-                            return fetch(url, config).then((response) => {
-                                if (!response.ok) {
-                                    throw new Error(`HTTP error! status: ${response.status}`);
-                                }
-                                return response.json();
-                            });
+                        this.failedQueue.push({
+                            resolve: () => {
+                                // When token is refreshed, retry the request
+                                fetch(url, config)
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            return response.json().then(errorData => {
+                                                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                                            });
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(resolve)
+                                    .catch(reject);
+                            },
+                            reject
                         });
+                    });
                 }
             }
 
@@ -124,7 +131,6 @@ class ApiService {
         return this.request("/users/register", {
             method: "POST",
             body: formData,
-            headers: {}, // ✅ Don't set Content-Type for FormData
         });
     }
 
@@ -306,6 +312,67 @@ class ApiService {
             method: "POST",
             body: JSON.stringify({ email }),
         });
+    }
+
+    // ========== ABOUT PAGE ENDPOINTS ========== ✅ NEW SECTION
+
+    /**
+     * Get About page data (Public endpoint)
+     * Fetches videos, mission, vision, stats, etc.
+     * @returns {Promise} About page data
+     */
+    async getAboutData() {
+        console.log("📄 Fetching About page data...");
+        try {
+            const response = await this.request("/about", {
+                method: "GET",
+            });
+            console.log("✅ About data fetched successfully:", response);
+            return response;
+        } catch (error: any) {
+            console.error("❌ Failed to fetch About data:", error);
+            throw error;
+        }
+    }
+
+    /**
+     * Update About page data (Admin only)
+     * Updates videos, mission, vision, stats, etc.
+     * @param {Object} data - About page data including videos array
+     * @returns {Promise} Updated about page data
+     */
+    async updateAboutData(data: any) {
+        console.log("💾 Updating About page data...", data);
+        try {
+            const response = await this.request("/about", {
+                method: "PUT",
+                body: JSON.stringify(data),
+            });
+            console.log("✅ About data updated successfully");
+            return response;
+        } catch (error: any) {
+            console.error("❌ Failed to update About data:", error);
+            throw error;
+        }
+    }
+
+    /**
+     * Reset About page to default values (Admin only)
+     * Deletes current data and creates default about page
+     * @returns {Promise} Default about page data
+     */
+    async resetAboutData() {
+        console.log("🔄 Resetting About page to default...");
+        try {
+            const response = await this.request("/about", {
+                method: "DELETE",
+            });
+            console.log("✅ About page reset successfully");
+            return response;
+        } catch (error: any) {
+            console.error("❌ Failed to reset About data:", error);
+            throw error;
+        }
     }
 }
 
